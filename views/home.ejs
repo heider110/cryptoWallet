@@ -1,0 +1,46 @@
+
+<%- include('header'); -%>
+
+
+<div class="table">
+    <table class="table table-striped table-dark">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Price</th>
+            <th scope="col">1h %</th>
+            <th scope="col">24h</th>
+            <th scope="col">7dh</th>
+          </tr>
+        </thead>
+        <tbody>
+            <% for (let i =0 ;i< cryptoList.length;i ++){%>
+                <tr>
+                    <th scope="row"><%= rank[i] %></th>
+                    <td> <%= cryptoList[i] %></td>
+                    <td><%=price[i]%></td>
+                    <td><%=oneHr[i]%></td>
+                    <td><%=twentyFourHr[i]%></td>
+                    <td><%=sevenDays[i]%></td>
+                  </tr> 
+    
+          <%  } %> 
+          
+          
+        </tbody>
+      </table>
+
+    </div>
+       
+  
+         
+            
+            
+       
+       
+    <form action="/" method="get">
+      
+    </form>
+ 
+    <%- include('footer'); -%>

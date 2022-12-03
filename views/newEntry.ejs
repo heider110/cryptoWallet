@@ -1,0 +1,38 @@
+<%- include('header'); -%>
+
+ <div class="purchaseForm" >
+
+    <form action="/" method="post">
+     
+     <div class=" form-row" >
+      <div class="form-group col-md-6">
+      <label for="date">The date of purchase:</label>
+      <input  class="form-control" type="date" name="date" placeholder="dd.mm.yyyy">
+      </div>
+      
+      <div class="form-group col-md-6">
+      <label for="cryptoList">Purchased Cryptocurrency:</label>
+        <input list="cryptoList" class="form-control" name="cryptoList" placeholder="e.g. Bitcoin" />
+        <datalist id="cryptoList">
+          <% for (let i =0 ;i< cryptoList.length;i ++){%>
+                <option value=<%= cryptoList[i] %>>
+      <%  } %> 
+     
+        </datalist>
+        </div>
+  
+        <div class="form-group col-md-6">
+        <label for="quantity">Purchased Quantity:</label>
+        <input type="text" class="form-control" name="quantity">
+        </div>
+  
+        <div class="form-group col-md-6">
+        <label for="cost">Purchased Price $:</label>
+        <input type="text" class="form-control" name="cost">
+      </div>
+   
+      <button type="submit"  class="btn btn-outline-primary btn-lg " name="newEntry">New Entry</button>
+    </div>
+    </form>
+  </div>
+  <%- include('footer'); -%>
