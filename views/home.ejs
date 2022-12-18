@@ -1,0 +1,90 @@
+
+<%- include('header'); -%>
+
+
+
+<div >
+  
+      <table  class="table  table-dark">  
+    <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Price</th>
+            <th scope="col">1h %</th>
+            <th scope="col">24h %</th>
+            <th scope="col">7dh %</th>
+          </tr>
+        </thead>
+        <tbody id="myTable">
+            <%  apiDatas.forEach(function (apiData) {%>
+            <% 
+              const rank= apiData.rank
+              const cryptoName =apiData.cryptoName
+              const symbole =apiData.symbole
+              const cryptoPrice= apiData.cryptoPrice
+              const percent_change_1h= apiData.percent_change_1h
+              const percent_change_24h= apiData.percent_change_24h
+              const percent_change_7d= apiData.percent_change_7d
+              const cryptoId= apiData.cryptoId
+              const logo = apiData.logo
+              const cryptoNamereplace = cryptoName.replace(/\s/g,'-');
+              
+              %>   
+              
+                <tr >
+                  <td > <input type="checkbox" class="glyphicon glyphicon-star-empty" ></td>
+                    <td ><%= rank %></td>
+                   
+                    <td><a href="https://coinmarketcap.com/currencies/<%= cryptoNamereplace %>" ><img class="logo" src="<%= logo %> " alt="" ></a> <%= cryptoName %> <h6><%= symbole %></h6></td>
+                    <td><%=cryptoPrice%></td>
+
+                    <% if  (percent_change_1h.includes ("-")){%> 
+                    <td class="red"><%=percent_change_1h%></td>
+                    <% }else{ %> 
+                      <td class="green"><%=percent_change_1h%></td><% } %> 
+
+                      <% if  (percent_change_24h.includes ("-")){%> 
+                        <td class="red"><%=percent_change_24h%></td>
+                        <% }else{ %> 
+                          <td class="green"><%=percent_change_24h%></td><% } %> 
+
+                          <% if  (percent_change_7d.includes ("-")){%> 
+                            <td class="red"><%=percent_change_7d%></td>
+                            <% }else{ %> 
+                              <td class="green"><%=percent_change_7d%></td><% } %> 
+
+                             
+                  </tr> 
+    
+                  <% });%> 
+          
+          
+        </tbody>
+      </table>
+
+    </div>
+       
+  
+    
+         
+    <script>
+      $(document).ready(function(){
+        $("#myInput").on("keyup", function() {
+          var value = $(this).val().toLowerCase();
+          $("#myTable tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+          });
+        });
+      });
+      </script>
+            
+       
+       
+    <form action="/" method="get">
+      
+    </form>
+
+   
+    <%- include('footer'); -%> 
