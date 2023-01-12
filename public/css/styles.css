@@ -1,58 +1,131 @@
-body{
-  background-color: #282A3A;
-}
-.table{
-    padding: 10%;
-    text-align: left;
-    font-size: 1em ;
-    font-weight: bold;
-}
-.form-row{
-   color: aliceblue;
-margin: 3%  ;
+
+
+.table {
   padding: 3%;
-   background-color: #453C67;
-   border-radius: 1%;
-   border-block-color: white;
-    border-style: solid;
-    border-width: 1px;
+  text-align: left;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: 1%;
 }
-.col-md-6{
-    padding: 1%;
+.form-row {
+  color: aliceblue;
+  margin: 3%;
+  padding: 3%;
+  background-color: transparent;
+  
+  border-block-color: rgb(177, 174, 174);
+  border-style: solid;
+  border-width: 1px;
+}
+.col-md-6 {
+  padding: 1%;
 }
 .container-fluid {
-    padding-top: 70px;
-    padding-bottom: 70px;
+  padding: 1%;
 }
 .navbar {
-    padding-top: 15px;
-    padding-bottom: 15px;
-    border: 0;
-    border-radius: 0;
-    margin-bottom: 0;
-    font-size: 12px;
-    letter-spacing: 5px;
-    font-weight: bold;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border: 0;
+  border-radius: 0;
+  margin-bottom: 0;
+  margin-left: 0%;
+  font-size: 12px;
+  letter-spacing: 5px;
+  font-weight: bold;
 }
-.navbar-nav  li a:hover {
-    color: #1abc9c !important;
+.navbar-nav li a:hover {
+  color: #1abc9c !important;
 }
 
 .footer-padding {
-	padding-bottom: 60px;
+  padding-bottom: 60px;
 }
 
 .footer {
-	position: absolute;
-	text-align: center;
-	bottom: 0;
-	width: 100%;
-	height: 60px;
-	background-color:  #497174;
+  position: absolute;
+  text-align: center;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #497174;
 }
 
 .footer p {
-	margin-top: 25px;
-	font-size: 12px;
+  margin-top: 25px;
+  font-size: 12px;
   color: #fff;
+}
+h1 {
+  color: aliceblue;
+}
+
+.red {
+  color: rgb(248, 16, 16);
+}
+.green {
+  color: rgb(86, 223, 86);
+}
+.r {
+  margin: 100px;
+}
+
+.glyphicon:before {
+  visibility: visible;
+}
+.glyphicon:hover {
+  color: #fac213;
+}
+.glyphicon.glyphicon-star-empty:checked:before {
+  content: "\e006";
+  color: #fac213;
+}
+input[type="checkbox"].glyphicon {
+  visibility: hidden;
+}
+.logo {
+  border-radius: 50%;
+  width: 34px;
+   height: 34px;
+}
+
+.logo:hover{
+  cursor: pointer;
+  
+}
+.toggleIcon{
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.76);
+  text-align: right;
+  margin:1% 1% ;
+}
+.icon:hover{
+  
+  cursor: pointer;
+  color: rgb(255, 255, 255);
+}
+
+.searchBox{
+  width: 250px;
+  margin-top: 5%;
+}
+.row{
+  margin: 0px;
+}
+.msg{
+  height: 25px;
+  width: 50%;
+  background-color: #CEEDC7;
+}
+.trasButton{
+  background-color: transparent;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
+}
+.side{
+  background-color: #59CE8F;
+   font-weight: bold;
 }

@@ -1,0 +1,95 @@
+<%- include('header'); -%>
+<form action="/myentries" method="post">
+<div class="table">
+    <table class="table  table-dark">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Date</th>
+            <th scope="col">Time</th>
+            <th scope="col">Side</th>
+            
+            <th scope="col">Name</th>
+            <th scope="col">Amount </th>
+            <th scope="col">Buy Price per coin $</th>
+            <th scope="col">Buy Price in total $</th>
+            <th scope="col">Current Price Per Coin $</th>
+            <th scope="col">Current Price in Total $</th>
+            <th scope="col">Profit/Loss</th>
+            
+          </tr>
+        </thead>
+        <tbody id="myTable">
+<%  
+ newEntries.forEach(function (newEntry) {
+    const id = newEntry._id;
+    const date= newEntry.date;
+    const time= newEntry.time
+    const side = newEntry.side;
+    const name = newEntry.name;
+    const amount = newEntry.amount;
+    const buyPricePercoin = newEntry.buyPricePerCoin
+    const buyPriceInTotal = newEntry.buyPriceInTotal
+    const currentPricePerCoin = newEntry.currentPricePerCoin
+    const currentPriceIntotal = newEntry.currentPriceInTotal
+    const profit = newEntry.profit
+     %>
+ 
+
+
+   
+                <tr>
+                    
+                    <td> <button type="submit" value="<%= id %>"  class="trasButton" name="delete"><i class="fa-regular fa-trash-can"></i></button></td>
+                    <td> <%= date %></td>
+                    <td> <%= time %></td>
+                    <td id="side"><%=side%></td>
+                  
+                    <td><%=name%></td>
+                    <td><%=amount%></td>
+                    <td><%=buyPricePercoin%></td>
+                    <td><%=buyPriceInTotal%></td>
+                    <td><%=currentPricePerCoin%></td>
+                    <td><%=currentPriceIntotal%></td>
+                   
+                    <% if  (profit.includes("-")){%> 
+                            <td class="red"><%=profit%></td>
+                            <% }else{ %> 
+                              <td class="green"><%=profit%></td><% } %> 
+                  </tr> 
+    
+        
+          <% });%> 
+          
+        </tbody>
+      </table>
+
+    </div>
+  </form>
+     
+    <script>
+      $(document).ready(function(){
+        $("#myInput").on("keyup", function() {
+          var value = $(this).val().toLowerCase();
+          $("#myTable tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+          });
+        });
+      });
+      </script>
+      <script>
+     
+     $(document).ready(function(){
+      $("tr").find('td').each (function() {
+ if($(this).text()==="BUY"){
+  $(this).css({"color": "green"})
+ } else if($(this).text()==="SELL" ){
+  $(this).css({"color": "red"})
+ }; 
+});                          
+     })
+     
+  
+     </script>
+
+<%- include('footer'); -%>

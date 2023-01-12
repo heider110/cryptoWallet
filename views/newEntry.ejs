@@ -1,38 +1,121 @@
 <%- include('header'); -%>
 
- <div class="purchaseForm" >
+ <div class="purchaseForm " >
 
-    <form action="/" method="post">
-     
-     <div class=" form-row" >
+ 
+   
+ 
+
+    <form action="/newEntry" method="post" id="formNewTransaction" onsubmit="return handleData()">
+      
+     <div class=" form-row " >
+      <% if(success !=""){%>
+        <div id="success" class="alert alert-success">
+
+         <p><i class="fa-regular fa-circle-check"></i><%= success %> </p> 
+        </div>
+       
+      <%  } %> 
+      
+      <h1>New Transaction</h1>
       <div class="form-group col-md-6">
-      <label for="date">The date of purchase:</label>
-      <input  class="form-control" type="date" name="date" placeholder="dd.mm.yyyy">
+      <label for="date">Date</label>
+      <input  class="form-control" type="date" name="date" placeholder="dd.mm.yyyy" required>
       </div>
       
+     
+        <div class="form-group col-md-6">
+        <label for="time">Time</label>
+        <input  class="form-control" type="time" name="time" placeholder="dd.mm.yyyy" step="2"  >
+        </div>
+
       <div class="form-group col-md-6">
-      <label for="cryptoList">Purchased Cryptocurrency:</label>
-        <input list="cryptoList" class="form-control" name="cryptoList" placeholder="e.g. Bitcoin" />
+        
+      <label for="cryptoList">Trading Currency</label>
+        <input list="cryptoList" class="form-control " name="cryptoList" placeholder="e.g. Bitcoin" autocomplete="off" required/>
         <datalist id="cryptoList">
-          <% for (let i =0 ;i< cryptoList.length;i ++){%>
-                <option value=<%= cryptoList[i] %>>
-      <%  } %> 
+            <%  apiDatas.forEach(function (apiData) {%>
+                <%  const cryptoName =apiData.cryptoName %>   
+                <option ><%= cryptoName %></option>
+                   
+      <%  }) %> 
      
         </datalist>
         </div>
   
         <div class="form-group col-md-6">
-        <label for="quantity">Purchased Quantity:</label>
-        <input type="text" class="form-control" name="quantity">
+        <label for="quantity">Amount</label>
+        <input type="number" step="any" class="form-control " name="amount" autocomplete="off" required>
         </div>
   
         <div class="form-group col-md-6">
-        <label for="cost">Purchased Price $:</label>
-        <input type="text" class="form-control" name="cost">
+        <label for="cost">Buy Price in USD&ensp;</label>
+        <label for="perCoin"> per coin </label>
+        <input class="checkoption" name="checkboxPerCoin"  type="checkbox"  id="perCoin">
+        <label for="inTotal">&ensp;in total </label>
+        <input class="checkoption" name="checkBoxInToltal"  type="checkbox"  id="inTotal">
+        <input type="number" step="any" class="form-control "  name="cost" autocomplete="off" required>
+        <p style="visibility:hidden; color:red; " id="chk_option_error">Please select at least one option.</p> 
       </div>
-   
-      <button type="submit"  class="btn btn-outline-primary btn-lg " name="newEntry">New Entry</button>
-    </div>
+
+      <div class="form-group col-md-6">
+        <label for="side">Art Of Transaction:</label>
+        <select name="side" class="form-control side" id="side" required>
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+        </select>
+
+      </div>
+      
+     <div class="form-group ">
+      <button type="submit"  class="btn btn btn-success btn-lg " name="newEntry">Add Transaction</button>
+  </div>
+  </div>
     </form>
   </div>
+
+  <script>
+     
+    $(document).ready(function(){
+      //New Transaction button change
+      $("#side").on("change", function(){
+        if ($("#side").val()==="SELL") {
+      $("button").addClass("btn-danger");
+      $("#side").css({"background-color": "#E64848"})
+     } else if ($("#side").val()==="BUY"){
+      $("button").removeClass("btn-danger");
+      $("button").addClass("btn-success");
+      $("#side").css({"background-color": "#59CE8F"})
+     }
+    
+      });
+     // hide the sccess message
+      $('#success').delay(5000).fadeOut('slow');
+
+      // must one of checkboxess checked
+     $('.checkoption').click(function() {
+         $('.checkoption').not(this).prop('checked', false);
+      });
+      $("#myInput").hide()
+      
+    });
+    </script>
+    <script>
+      //if both checkboxes not checked
+       $( "#formNewTransaction" ).submit(function(  ) {
+        if(!$('.checkoption').is(':checked'))
+    {
+        $("#chk_option_error").css("visibility", "visible");
+      return false;
+    }
+    else
+    {
+        $("#chk_option_error").css("visibility", "hidden");
+      return true;
+    }
+    
+});
+     
+    </script>
+ 
   <%- include('footer'); -%>
