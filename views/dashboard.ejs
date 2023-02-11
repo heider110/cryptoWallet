@@ -1,53 +1,211 @@
-<%- include('header'); -%>
+<%
+//get sum of totalInvestment
+const allInvseted= function () {
+  let sum = 0;
+  for (let i = 0; i < dashboard.length; i++) {
+    sum += dashboard[i].totalInvestment;
+  }
+  return sum;
+};
+//get sum of currentValueInTotal
+const holdValue = function () {
+  let sum = 0;
+  for (let i = 0; i < dashboard.length; i++) {
+    sum += dashboard[i].currentValueInTotal;
+  }
+  return sum;
+} ;
 
-<div class="table">
-    <table class="table table-striped table-dark">
-        <thead>
-          <tr>
-            <th scope="col">id</th>
-            <th scope="col">Date</th>
-            <th scope="col">Side</th>
-            
-            <th scope="col">Name</th>
-            <th scope="col">Quantity </th>
-            <th scope="col">Price $</th>
-            
-          </tr>
-        </thead>
-        <tbody>
-<%  
- newEntries.forEach(function (newEntry) {
-    const id = newEntry.id;
-    const date= newEntry.date;
-    const side = newEntry.side;
-    const name = newEntry.name;
-    const quantity = newEntry.quantity;
-    const price = newEntry.price %>
- 
+const allProfit= holdValue()-allInvseted();
+const  allRoi= allProfit / allInvseted() || 0 
 
+const maxReturnValue = Math.max(...dashboard.map(o => o.roi))
+const   maxReturnName=   dashboard.find(  function(o){ return   o.roi ==  maxReturnValue; });
+function errResolve(x) {if(x === undefined){return "No Data"} else{return x._id}}
 
-   
-                <tr>
-                    
-                    <td> <%= id %></td>
-                    <td> <%= date %></td>
-                    <td><%=side%></td>
-                  
-                    <td><%=name%></td>
-                    <td><%=quantity%></td>
-                    <td><%=price%></td>
-                  
-                  </tr> 
-    
-        
-          <% });%> 
-          
-        </tbody>
-      </table>
+const minReturnValue = Math.min(...dashboard.map((o) =>o.roi  ))
+const minReturnName=dashboard.find( function(o){ return  o.roi == minReturnValue; })
 
-    </div>
+const maxChange24Value = Math.max(...dashboard.map((o) =>o.percent_change_7d  ))
+const   maxChange24Name=   dashboard.find( function(o){ return o.percent_change_7d == maxChange24Value; })
   
+const minChange24Value = Math.min(...dashboard.map((o) =>o.percent_change_7d  ))
+const   minChange24Name=  dashboard.find( function(o){ return o.percent_change_7d == minChange24Value; })
+  %>
+
+<% // Functions to retuns number in currency or precentage format
+  function currency(num) {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'USD',
+    maximumSignificantDigits: 4,
+  }).format(num);
+}
+
+ function percent(num) {
+  return new Intl.NumberFormat('default', {
+    style: 'percent',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+
+  }).format(num / 100);
+
+}
+
+function shortNumber(num) {
+  return new Intl.NumberFormat('de-DE', {
+    maximumSignificantDigits: 3
+  }).format(num);
+}
+ //----------------end functions Teil ----------//
+ %>
+
+<%- include('partials/header'); -%>
+
+<!-- dasboard kisten section -->
+
+
+<div id="dashboardBoxes" class="content container-fluid ">
+  <div class="row">
+    <div class="note ">
+      <h1>Invested Value</h1>
+      <p class="redGreed"><%=currency(allInvseted())%></p>
+    </div>
+
+    <div class="note ">
+      <h1>Holding Value</h1>
+      <p class="redGreed"><%=currency(holdValue())%></p>
+    </div>
+
+    <div class="note ">
+      <h1>Profit / Loss</h1>
+      <p class="redGreed"><%=currency(allProfit)%></p>
+    </div>
+
+    <div class="note ">
+      <h1>Total ROI</h1>
+      <p class="redGreed"><%=percent(allRoi)%></p>
+    </div>
+
+    <div class="note ">
+      <h1>Best Return</h1>
+      <p class="redGreed"> <%=errResolve(maxReturnName)%><%=percent(maxReturnValue)%></p>
+    </div>
+
+    <div class="note ">
+      <h1>Worst Return</h1>
+      <p class="redGreed"> <%=errResolve(minReturnName)%> <%=percent(minReturnValue)%></p>
+    </div>
+
+    <div class="note ">
+      <h1>Best Change 24 H</h1>
+      <p class="redGreed"> <%=errResolve(maxChange24Name)%> <%=percent(maxChange24Value)%></p>
+    </div>
+
+    <div class="note ">
+      <h1>Worst Change 24 H</h1>
+      <p class="redGreed"> <%=errResolve(minChange24Name)%> <%=percent(minChange24Value)%></p>
+    </div>
+  </div>
+
+</div>
+
+<!--End dasboard kisten section -->
+
+<!-- dasboard Table section -->
+<div class="content  home">
  
 
 
-<%- include('footer'); -%>
+  <form action="/dashboard" method="post">
+    <table id="coinsTable" class="    custom-table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Amount</th>
+          <th scope="col">Total Investment $</th>
+          <th scope="col">Current Value $</th>
+          <th scope="col">Profit/Los </th>
+          <th scope="col">ROI</th>
+          <th scope="col">AVG. Buy Price</th>
+          <th scope="col">Current Price</th>
+          <th scope="col">24H %</th>
+        </tr>
+
+      </thead>
+      <tbody>
+
+
+        <% dashboard.forEach(function (coin) {%>
+          <%const name = coin._id;%>
+         <% const  totalAmount= coin.totalAmount;%>
+          <%const  totalInvestment= coin.totalInvestment;%>
+          <%const currentValuePerCoin = coin.currentValuePerCoin;%>
+          <%const currentValueInTotal = coin.currentValueInTotal;%>
+          <%const  avrgBuyPrice = coin.avrgBuyPrice;%>
+          <%const profit = coin.profit;%>
+          <%const roi = coin.roi;%>
+          <%const percent_change_7d = coin.percent_change_7d;%>
+          <%const logo = coin.logo; %>
+
+
+        <tr scope="row">
+          <td>  <button type="submit" value=<%= name %> class="trasButton" name="logo"><img src="<%=logo%>" alt="" /></button> <%=name%> </td>
+          <td> <%=shortNumber(totalAmount)%> </td>
+          <td> <%=currency(totalInvestment)%></td>
+          <td><%=currency(currentValueInTotal)%></td>
+          <td class="redGreed"><%=currency(profit)%></td>
+          <td class="redGreed"><%=percent(roi)%></td>
+          <td><%=currency(avrgBuyPrice)%></td>
+          <td><%=currency(currentValuePerCoin)%></td>
+          <td class="redGreed"><%=percent(percent_change_7d)%></td>
+        </tr>
+
+        <% }) %>
+
+      </tbody>
+    </table>
+  </form>
+
+ 
+
+</div>
+
+
+
+<%- include('partials/footer'); -%>
+
+<!-- //dynamic table -->
+<script>
+  $(document).ready(function() {
+    $('#coinsTable').DataTable({
+      "iDisplayLength": 25,
+      "aLengthMenu": [
+        [10, 25, 50, 100, -1],
+        [10, 25, 50, 100, "All"]
+      ],
+      "language": {
+        "lengthMenu": "Show rows _MENU_ ",
+        "paginate": {
+          "next": ">",
+          "previous": "<"
+        }
+      }
+    });
+  });
+</script>
+
+<script>
+  // change color basen on value
+  $(document).ready(function() {
+    $(".redGreed").each(function() {
+      var value = $(this).text();
+
+      if (value.includes("-")) {
+        $(this).addClass("red");
+      } else {
+        $(this).addClass("green");
+      };
+    })
+  });
+</script>

@@ -1,75 +1,127 @@
-
-
-.table {
-  padding: 3%;
-  text-align: left;
-  font-size: 1.1em;
-  font-weight: bold;
-  margin: 1%;
+body{
+  background-color: #f6f7f8;
+ 
+ 
 }
-.form-row {
-  color: aliceblue;
+ /* dasboard */
+ 
+.note {
+  background: #fff;
+  border-radius: 7px;
+  box-shadow: 0 2px 5px #ccc;
+  padding: 10px;
+  width: 240px;
+  height: 200px;
+ margin: 2%;
+  
+  text-align: center;
+}
+.note h1 {
+  font-size:1.4em;
+  margin-bottom: 20px;
+  color: #4e4e4e;
+}
+.note p {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  
+}
+#dashboardBoxes{
+  margin:auto;
+  width: 50%;
+ 
+ 
+  font-size: 1.2em;
+  font-weight: bold;
+ width: 94%;
+  background-color: #012169;
+  position: static;
+  border: 3px solid #fff;
+  border-radius: 10px;
+
+ 
+}
+.row{
+  margin:5%;
+  width: 90%;
+}
+
+/* end dashboard box */
+.heroSection{
+  color: #009cde;
   margin: 3%;
   padding: 3%;
-  background-color: transparent;
-  
-  border-block-color: rgb(177, 174, 174);
+  background-color: #012169;
+  border: 2px solid #009cde;
+  box-shadow: 1px 1px 7px #009cde;
+ 
+  border-radius: 15px;
   border-style: solid;
   border-width: 1px;
+  
+ 
+ 
 }
-.col-md-6 {
-  padding: 1%;
-}
-.container-fluid {
-  padding: 1%;
-}
-.navbar {
-  padding-top: 5px;
-  padding-bottom: 5px;
-  border: 0;
-  border-radius: 0;
-  margin-bottom: 0;
-  margin-left: 0%;
-  font-size: 12px;
-  letter-spacing: 5px;
+
+/* tables */
+   
+  .custom-table tbody tr th, .custom-table tbody tr td {
+    background: #fff;
+    border: 1px solid transparent; }
+    .custom-table tbody tr th:first-child, .custom-table tbody tr td:first-child {
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px; }
+    .custom-table tbody tr th:last-child, .custom-table tbody tr td:last-child {
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px; }
+ 
+
+
+      #coinsTable   {
+  border-collapse: separate;
+  border-spacing: 0px 10px;
+  font-size: 1.3em;
   font-weight: bold;
 }
+
+
+
+/* New Transaction */
+
+.purchaseForm {
+ color: #009cde;
+  margin: 3%;
+  padding: 3%;
+  background-color: #012169;
+  border: 2px solid #009cde;
+  box-shadow: 1px 1px 7px #009cde;
+ 
+  border-radius: 15px;
+  border-style: solid;
+  border-width: 1px;
+  z-index: -1;
+}
+
+/* navbar */
+.navbar {
+ margin: 0 3% 0 ;
+ 
+  
+  font-size: 1.2em;
+  font-weight: bold;
+ width: 94%;
+  background-color: #009cde;
+  position: static;
+
+  border-radius: 10px;
+  float: left;
+ color: #009cde;
+}
 .navbar-nav li a:hover {
-  color: #1abc9c !important;
+  color: #009cde !important;
 }
-
-.footer-padding {
-  padding-bottom: 60px;
-}
-
-.footer {
-  position: absolute;
-  text-align: center;
-  bottom: 0;
-  width: 100%;
-  height: 60px;
-  background-color: #497174;
-}
-
-.footer p {
-  margin-top: 25px;
-  font-size: 12px;
-  color: #fff;
-}
-h1 {
-  color: aliceblue;
-}
-
-.red {
-  color: rgb(248, 16, 16);
-}
-.green {
-  color: rgb(86, 223, 86);
-}
-.r {
-  margin: 100px;
-}
-
 .glyphicon:before {
   visibility: visible;
 }
@@ -91,27 +143,43 @@ input[type="checkbox"].glyphicon {
 
 .logo:hover{
   cursor: pointer;
+}
+/* Footer */
+
+
+footer {
+  margin-top: 20%;
+  text-align: center;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #012169;
+}
+
+footer p {
+  padding-top: 25px;
+  margin-top: 25px;
+  font-size: 12px;
+  color: #009cde;
+}
+ 
+
+.red {
+  color: rgb(212, 5, 5);
+}
+.green {
+  color: rgb(9, 151, 9);
+}
+
+
+
   
-}
-.toggleIcon{
-  font-size: 2rem;
-  color: rgba(255, 255, 255, 0.76);
-  text-align: right;
-  margin:1% 1% ;
-}
-.icon:hover{
-  
-  cursor: pointer;
-  color: rgb(255, 255, 255);
-}
 
 .searchBox{
   width: 250px;
   margin-top: 5%;
 }
-.row{
-  margin: 0px;
-}
+
 .msg{
   height: 25px;
   width: 50%;
@@ -129,3 +197,142 @@ input[type="checkbox"].glyphicon {
   background-color: #59CE8F;
    font-weight: bold;
 }
+
+.home{
+  margin: 3%;
+}
+
+
+/* .................... */
+
+
+/*--------------------------------------------------------------
+# Header
+--------------------------------------------------------------*/
+#header {
+  transition: all 0.5s;
+  z-index: 997;
+  padding:  0;
+}
+
+#header .logo {
+  font-size: 28px;
+  margin: 0;
+  padding: 0;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+
+
+#header .logo img {
+  max-height: 40px;
+}
+
+#header.header-scrolled {
+  background: rgba(0, 0, 0, 0.9);
+  padding: 12px 0;
+}
+
+/*--------------------------------------------------------------
+# Navigation Menu
+--------------------------------------------------------------*/
+/**
+* Desktop Navigation 
+*/
+.navbar {
+  padding: 0;
+}
+
+.navbar ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  list-style: none;
+  align-items: center;
+}
+
+.navbar li {
+  position: relative;
+}
+
+.navbar>ul>li {
+  white-space: nowrap;
+  padding: 10px 0 10px 30px;
+}
+
+.navbar a,
+.navbar a:focus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #012169;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 0;
+  white-space: nowrap;
+  transition: 0.3s;
+  letter-spacing: 0.4px;
+  position: relative;
+  text-transform: uppercase;
+}
+
+
+
+
+
+.navbar .dropdown ul {
+  display: block;
+  position: absolute;
+  left: 30px;
+  top: calc(100% + 30px);
+  margin: 0;
+  padding: 10px 0;
+  z-index: 99;
+  opacity: 0;
+  visibility: hidden;
+  background: #f6f7f8;
+  box-shadow: 0px 0px 30px rgba(127, 137, 161, 0.25);
+  transition: 0.3s;
+  border-radius: 10px;
+}
+
+.navbar .dropdown ul li {
+  min-width: 200px;
+}
+
+.navbar .dropdown ul a {
+  padding: 10px 20px;
+  font-size: 14px;
+  text-transform: none;
+  color: #4e4e4e;
+}
+
+.navbar .dropdown ul a i {
+  font-size: 12px;
+}
+
+
+
+.navbar .dropdown:hover>ul {
+  opacity: 1;
+  top: 100%;
+  visibility: visible;
+}
+
+.navbar .dropdown .dropdown ul {
+  top: 0;
+  left: calc(100% - 30px);
+  visibility: hidden;
+}
+
+.navbar .dropdown .dropdown:hover>ul {
+  opacity: 1;
+  top: 0;
+  left: 100%;
+  visibility: visible;
+}
+
+  .navbar .dropdown .dropdown:hover>ul {
+    left: -100%;
+  }

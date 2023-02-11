@@ -1,87 +1,106 @@
+<%- include('partials/header'); -%>
 
-<%- include('header'); -%>
+<div class="home content">
+  <form action="/favourite" method="post">
 
 
-<form action="/favourite" method="post">
-<div >
-  
-      <table  class="table  table-dark">  
-    <thead>
-          <tr>
-            <th scope="col"></th>
-            <th scope="col">id</th>
-            <th scope="col">Name</th>
-            <th scope="col">Price</th>
-            <th scope="col">1h %</th>
-            <th scope="col">24h %</th>
-            <th scope="col">7dh %</th>
-          </tr>
-        </thead>
-        <tbody id="myTable">
-            <%  apiDatas.forEach(function (apiData) {%>
-            <% 
+    <table id="coinsTable" class="    custom-table">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">id</th>
+          <th scope="col">Name</th>
+          <th scope="col">Price</th>
+          <th scope="col">1h %</th>
+          <th scope="col">24h %</th>
+          <th scope="col">7dh %</th>
+        </tr>
+      </thead>
+      <tbody id="myTable">
+        <%  apiDatas.forEach(function (apiData) {%>
+        <% 
               const rank= apiData.rank
               const cryptoName =apiData.cryptoName
               const symbol =apiData.symbol
-              const cryptoPrice= apiData.cryptoPrice
-              const percent_change_1h= apiData.percent_change_1h
-              const percent_change_24h= apiData.percent_change_24h
-              const percent_change_7d= apiData.percent_change_7d
+              const cryptoPrice= currency(apiData.cryptoPrice)
+              const percent_change_1h= percent(apiData.percent_change_1h)
+              const percent_change_24h= percent(apiData.percent_change_24h)
+              const percent_change_7d= percent(apiData.percent_change_7d)
               const cryptoId= apiData.cryptoId
               const logo = apiData.logo
               const cryptoNamereplace = cryptoName.replace(/\s/g,'-');
               
-              %>   
-              
-                <tr >
-                  <td > <input type="checkbox"  id="checkbox" class="glyphicon glyphicon-star-empty" name="checkbox" value="<%= cryptoName %> "  onChange="this.form.submit()" ></td>
-                    <td ><%= rank %></td>
-                   
-                    <td><a href="https://coinmarketcap.com/currencies/<%= cryptoNamereplace %>" ><img class="logo" src="<%= logo %> " alt="" ></a> <%= cryptoName %> <h6><%= symbol %></h6></td>
-                    <td><%=cryptoPrice%></td>
+              %>
 
-                    <% if  (percent_change_1h.includes ("-")){%> 
-                    <td class="red"><%=percent_change_1h%></td>
-                    <% }else{ %> 
-                      <td class="green"><%=percent_change_1h%></td><% } %> 
+        <tr>
+          <td> <input type="checkbox" id="checkbox" class="glyphicon glyphicon-star-empty" name="checkbox" value="<%= apiData._id %> " onChange="this.form.submit()"></td>
+          <td><%= rank %></td>
 
-                      <% if  (percent_change_24h.includes ("-")){%> 
-                        <td class="red"><%=percent_change_24h%></td>
-                        <% }else{ %> 
-                          <td class="green"><%=percent_change_24h%></td><% } %> 
+          <td><a href="https://coinmarketcap.com/currencies/<%= cryptoNamereplace %>"><img class="logo" src="<%= logo %> " alt=""></a> <%= cryptoName %> <h6><%= symbol %></h6>
+          </td>
+          <td><%=cryptoPrice%></td>
+          <td class="redGreed"><%=percent_change_1h%></td>
+          <td class="redGreed"><%=percent_change_24h%></td>
+          <td class="redGreed"><%=percent_change_7d%></td>
+        </tr>
+        <% });%>
+      </tbody>
+    </table>
 
-                          <% if  (percent_change_7d.includes ("-")){%> 
-                            <td class="red"><%=percent_change_7d%></td>
-                            <% }else{ %> 
-                              <td class="green"><%=percent_change_7d%></td><% } %> 
 
-                             
-                  </tr> 
-    
-                  <% });%> 
-          
-          
-        </tbody>
-      </table>
+  </form>
+</div>
 
-    </div>
-  </form> 
-  
-    
+
+<!-- //dynamic table -->
+<script>
+  $(document).ready(function() {
+    $('#coinsTable').DataTable({
+      "language": {
+        "lengthMenu": "Show rows _MENU_ ",
+        "paginate": {
+          "next": ">",
+          "previous": "<"
+        }
+      }
+    });
+  });
+</script>
+
+
+<script>
+  // change color basen on value
+  $(document).ready(function() {
+    $(".redGreed").each(function() {
+      var value = $(this).text();
+
+      if (value.includes("-")) {
+        $(this).addClass("red");
+      } else {
+        $(this).addClass("green");
+      };
+    })
+  });
+</script>
+
+<% // Functions to retuns number in currency or precentage format 
+       function currency(num) { 
+         return new Intl.NumberFormat('de-DE', 
+         { style: 'currency' , currency: 'USD' , maximumSignificantDigits: 4, 
+         }).format(num); };
+     
+         function percent(num) { 
+           return new Intl.NumberFormat('default',
+          { style: 'percent' , minimumFractionDigits: 2,
+         maximumFractionDigits: 2, 
+         }).format(num / 100); } 
          
-    <script>
-      $(document).ready(function(){
-        $("#myInput").on("keyup", function() {
-          var value = $(this).val().toLowerCase();
-          $("#myTable tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-          });
-        });
-      });
-      </script>
-            
-           
-    
+         function shortNumber(num) { 
+           return new Intl.NumberFormat('de-DE',
+         { maximumSignificantDigits: 3
+          }).format(num); } //----------------end functions Teil ----------// 
+          %>
 
-   
-    <%- include('footer'); -%> 
+
+
+<%- include('partials/footer'); -%>

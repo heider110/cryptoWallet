@@ -45,7 +45,12 @@
           <td><%=buyPriceInTotal%></td>
           <td><%=currentPricePerCoin%></td>
           <td><%=currentPriceIntotal%></td>
-          <td class="redGreed"><%=profit%></td>
+
+          <% if  (profit < 0){%>
+          <td class="red"><%=profit%></td>
+          <% }else{ %>
+          <td class="green"><%=profit%></td>
+          <% } %>
         </tr>
         <% });%>
       </tbody>
@@ -91,20 +96,7 @@
     });
   });
 </script>
-<script>
-  // change color basen on value
-  $(document).ready(function() {
-    $(".redGreed").each(function() {
-      var value = $(this).text();
 
-      if (value.includes("-")) {
-        $(this).addClass("red");
-      } else {
-        $(this).addClass("green");
-      };
-    })
-  });
-</script>
 <% // Functions to retuns number in currency or precentage format 
        function currency(num) { 
          return new Intl.NumberFormat('de-DE', 
