@@ -13,7 +13,7 @@
 
 
 <div class="home content">
-  <form action="/" method="post">
+  
 
 
     <table id="coinsTable" class="    custom-table">
@@ -39,11 +39,18 @@
               const percent_change_7d=percent(apiData.percent_change_7d) ;
               const cryptoId=apiData.cryptoId ;
               const logo=apiData.logo ;
-              const cryptoNamereplace=cryptoName.replace(/\s/g,'-'); %>
+              const cryptoNamereplace=cryptoName.replace(/\s/g,'-');
+              const id=  (apiData._id); %>
 
         <tr>
           <td> 
-            <input type="checkbox" id="checkbox" class="glyphicon glyphicon-star-empty" name="checkbox" value="<%= apiData._id %> " onChange="this.form.submit()">
+           
+            <input type="checkbox" id="checkbox" class="glyphicon glyphicon-star-empty" name="checkbox" value="<%= id %> "
+            <% if(typeof user !== "undefined") { %>
+              <% if (user.favouriteList.includes(id)) { %>checked<% } %>
+              <% } %>
+            > 
+           
           </td>
           <td>
             <%= rank %>
@@ -71,7 +78,7 @@
       </tbody>
     </table>
 
-  </form>
+
 </div>
 
 
@@ -127,6 +134,24 @@
       };
     })
   });
+</script>
+
+
+<script>
+    $(document).ready(function(){
+      $('input[name="checkbox"]').on('change', function() {
+  const itemId = $(this).val(); console.log(itemId);
+  const isChecked = $(this).prop('checked');console.log(isChecked);
+  const url = `/favorite/${isChecked ? 'add' : 'remove'}/${itemId}`;
+  $.post(url, function(data) {
+
+
+    // update the UI to reflect the change in favorite status
+  });
+});
+
+    })
+   
 </script>
 
 <%- include('partials/footer'); -%>

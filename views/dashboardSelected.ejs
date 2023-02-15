@@ -1,12 +1,12 @@
 <%- include('partials/header'); -%>
 
 <div class="home content">
-  <form action="/myentries" method="post">
+ 
 
     <table id="coinsTable" class="custom-table">
       <thead>
         <tr>
-          <th scope="col"></th>
+       
           <th scope="col">Date</th>
           <th scope="col">Time</th>
           <th scope="col">Side</th>
@@ -22,24 +22,25 @@
       </thead>
       <tbody id="myTable">
         <%newEntries.forEach(function (newEntry) {%>
-        <% const id = newEntry._id;%>
-        <%const date= newEntry.date;%>
-        <%const time= newEntry.time;%>
-        <%const side = newEntry.side;%>
-        <%const name = newEntry.name;%>
-        <%const amount = shortNumber(newEntry.amount);%>
-        <%const buyPricePercoin = currency(newEntry.buyPricePerCoin)%>
-        <%const buyPriceInTotal = currency(newEntry.buyPriceInTotal)%>
-        <%const currentPricePerCoin = currency(newEntry.currentPricePerCoin)%> 
-        <%const currentPriceIntotal = currency(newEntry.currentPriceInTotal)%>
-        <%const profit = currency(newEntry.profit) %>
+          <% const id = newEntry.trans._id;%>
+          <% const logo = newEntry.trans.logo;%>
+          <%const date= newEntry.trans.date;%>
+          <%const time= newEntry.trans.time;%>
+          <%const side = newEntry.trans.side;%>
+          <%const name = newEntry.trans.name;%>
+          <%const amount = shortNumber(newEntry.trans.amount);%>
+          <%const buyPricePercoin = currency(newEntry.trans.buyPricePerCoin)%>
+          <%const buyPriceInTotal = currency(newEntry.trans.buyPriceInTotal)%>
+          <%const currentPricePerCoin = currency(newEntry.trans.currentPricePerCoin)%> 
+          <%const currentPriceIntotal = currency(newEntry.trans.currentPriceInTotal)%>
+          <%const profit = currency(newEntry.trans.profit) %>
+  
 
         <tr>
-          <td> <button type="submit" value=<%= id %> class="trasButton" name="delete"><i class="fa-regular fa-trash-can"></i></button></td>
           <td> <%= date %></td>
           <td> <%= time %></td>
           <td id="side"><%=side%></td>
-          <td><%=name%></td>
+          <td><img src="<%=logo%>" width="30px" height="30px" class="d-inline-block align-top" alt=""> <%=name%></td>
           <td><%=amount%></td>
           <td><%=buyPricePercoin%></td>
           <td><%=buyPriceInTotal%></td>
@@ -55,7 +56,7 @@
         <% });%>
       </tbody>
     </table>
-  </form>
+  
 </div>
 
 

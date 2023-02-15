@@ -147,10 +147,11 @@ function shortNumber(num) {
           <%const roi = coin.roi;%>
           <%const percent_change_7d = coin.percent_change_7d;%>
           <%const logo = coin.logo; %>
+          <%const symbol = coin.symbol; %>
 
 
         <tr scope="row">
-          <td>  <button type="submit" value=<%= name %> class="trasButton" name="logo"><img src="<%=logo%>" alt="" /></button> <%=name%> </td>
+          <td>  <button type="submit" value=<%=symbol%>  class="trasButton" name="logo"><img src="<%=logo%>" alt="" /></button> <%=name%> </td>
           <td> <%=shortNumber(totalAmount)%> </td>
           <td> <%=currency(totalInvestment)%></td>
           <td><%=currency(currentValueInTotal)%></td>

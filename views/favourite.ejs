@@ -20,20 +20,20 @@
         <%  apiDatas.forEach(function (apiData) {%>
         <% 
               const rank= apiData.rank
-              const cryptoName =apiData.cryptoName
-              const symbol =apiData.symbol
-              const cryptoPrice= currency(apiData.cryptoPrice)
-              const percent_change_1h= percent(apiData.percent_change_1h)
-              const percent_change_24h= percent(apiData.percent_change_24h)
-              const percent_change_7d= percent(apiData.percent_change_7d)
-              const cryptoId= apiData.cryptoId
-              const logo = apiData.logo
+              const cryptoName =apiData.favourite.cryptoName
+              const symbol =apiData.favourite.symbol
+              const cryptoPrice= currency(apiData.favourite.cryptoPrice)
+              const percent_change_1h= percent(apiData.favourite.percent_change_1h)
+              const percent_change_24h= percent(apiData.favourite.percent_change_24h)
+              const percent_change_7d= percent(apiData.favourite.percent_change_7d)
+              const cryptoId= apiData.favourite.cryptoId
+              const logo = apiData.favourite.logo
               const cryptoNamereplace = cryptoName.replace(/\s/g,'-');
               
               %>
 
         <tr>
-          <td> <input type="checkbox" id="checkbox" class="glyphicon glyphicon-star-empty" name="checkbox" value="<%= apiData._id %> " onChange="this.form.submit()"></td>
+          <td> <input type="checkbox" id="checkbox" class="glyphicon glyphicon-star-empty" name="checkbox" value="<%= apiData.favourite._id %> " onChange="this.form.submit()"></td>
           <td><%= rank %></td>
 
           <td><a href="https://coinmarketcap.com/currencies/<%= cryptoNamereplace %>"><img class="logo" src="<%= logo %> " alt=""></a> <%= cryptoName %> <h6><%= symbol %></h6>

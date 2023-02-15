@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+<div class="jumbotron text-center">
+  <div class="container">
+    <i class="fas fa-key fa-6x"></i>
+    <h1 class="display-3"> <%= name %> !</h1>
+
+    
+    <hr>
+    
+    <form action="/wallet" method="POST">
+
+        <div class="form-name">
+          <label for="wallet">Give a name for your Wallet:</label>
+          <input type="text" class="form-control text-center" name="wallet" placeholder="What's first name?" autocomplete="off" required>
+           <div>
+             <button type="submit" class="btn btn-primary btn-block btn-lg btn-rounded">Done</button>
+          </div>
+         
+        </div>
+       
+      </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

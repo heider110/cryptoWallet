@@ -23,6 +23,7 @@
       <tbody id="myTable">
         <%newEntries.forEach(function (newEntry) {%>
         <% const id = newEntry._id;%>
+        <% const logo = newEntry.logo;%>
         <%const date= newEntry.date;%>
         <%const time= newEntry.time;%>
         <%const side = newEntry.side;%>
@@ -39,7 +40,7 @@
           <td> <%= date %></td>
           <td> <%= time %></td>
           <td id="side"><%=side%></td>
-          <td><%=name%></td>
+          <td><img src="<%=logo%>" width="30px" height="30px" class="d-inline-block align-top" alt=""><%=name%></td>
           <td><%=amount%></td>
           <td><%=buyPricePercoin%></td>
           <td><%=buyPriceInTotal%></td>

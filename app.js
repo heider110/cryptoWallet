@@ -3,6 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const func = require(__dirname + "/js/functions.js")
 const ejs = require("ejs");
+var _ = require('lodash');
 
 const mongoose = require('mongoose');
 const { stringify } = require("querystring");
@@ -17,10 +18,10 @@ const findOrCreate = require('mongoose-findorcreate')
 //-------
 
 const app = express();
-app.use(express.static("public"))
+
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(express.static(__dirname + '/public'));
 
 //Lession386 
 app.use(session({
@@ -57,23 +58,32 @@ const apiSchema =  new mongoose.Schema({
   time: String,
   side: String,
   name: String,
+  symbol:String,
   amount:Number,
   buyPricePerCoin: Number,
   buyPriceInTotal: Number,
   currentPricePerCoin: Number,
   currentPriceInTotal: Number,
-  profit: Number
+  profit: Number,
+  logo:String
   
  })
 
  //user auth
 const userSchema =  new mongoose.Schema({
   username : String,
+  fName:String,
+  lName:String,
   password : String,
   googleId: String,
   secret: String,
+  walletName: String,
   transactions: [entrySchema],
-  favouriteList: [apiSchema]
+  favouriteList: [{ type:mongoose.Schema.Types.ObjectId, ref: "LiveData"}],
+  createsAt: {
+    type: Date,
+    default: Date.now
+  }
  })
 //----auth
 
@@ -165,10 +175,22 @@ updateData();
 //-----------------Home-------------------------//
 app.get("/", function (req, res) {
   
+  
    updateData()
         LiveData.find({},function(err,data){
           if(!err){
-             res.render("home", { apiDatas: data })
+            //check if user logged?
+   if (req.isAuthenticated()){
+    User.findById({_id:req.user._id}, function(err,foundUser){
+      if (err){
+          console.log(err);
+      } else {
+        res.render("home", { apiDatas: data, user: foundUser })
+      }});
+     // if user not logged?
+   }else{
+    res.render("home", { apiDatas: data })
+   }     
           }else {
             console.log(err);
           }
@@ -180,23 +202,33 @@ app.get("/", function (req, res) {
   
 
 
-app.post("/", function(req,res){
+// app.post("/", function(req,res){
 
-const checkedItemId =(req.body.checkbox).trim() ;
-  if (req.isAuthenticated()){
-  // Find the object you want to push
-LiveData.findById({_id:checkedItemId}, function(err, obj) {
-  if (err) return handleError(err);
+// const checkedItemId =(req.body.checkbox);
+
+
+//   if (req.isAuthenticated()){
+//     //if(typeof checkedItemId !== "undefined"){
+     
+     
+//        // Find the object you want to push
+// // LiveData.findById({_id:checkedItemId}, function(err, obj) {
+// //   if (err){console.log(err);
+// //   }else{console.log(obj);}
   
-  // Push the object to the other model .... $addToSet add if not exist .... instead $push duplicate
-  User.findByIdAndUpdate({_id:req.user._id}, { $addToSet: { favouriteList: obj } }, function(err) {
-    if (err) return handleError(err);
-  });
-});
-res.redirect("/")
-   }else{
-    res.redirect("/login")
-   }
+//   // Push the object to the other model .... $addToSet add if not exist .... instead $push duplicate
+//   // User.findByIdAndUpdate({_id:req.user._id}, { $addToSet: { favouriteList: checkedItemId} }, function(err) {
+//   //   if (err) {
+//   //     console.log(err);
+//   //   }
+//   // });
+// // });
+//     //}
+ 
+
+//    }else{
+//     res.redirect("/login")
+//    }
  
  
 
@@ -210,24 +242,109 @@ res.redirect("/")
 // }
 //  res.redirect("/")
 // })
-})
+//})
 
 //-----------------Faovourite-------------------------//
-app.get("/favourite", function(req,res){
-  updateData()
-  if (req.isAuthenticated()){
- User.findById({_id:req.user._id}, function(err,foundUser){
-    if (err){
-        console.log(err);
-    } else {
-      res.render("favourite", { apiDatas: foundUser.favouriteList })
-    }
-          
-       
-      }).sort({"favouriteList.rank":1})
-  }else{
+
+app.post('/favorite/add/:id', async (req, res) => {
+    if (req.isAuthenticated()){
+
+const favorite = await User.findByIdAndUpdate(
+  {_id:req.user._id}, // find the first (and only) favorite document
+    { $addToSet: { favouriteList: req.params.id } }, // add the item to the favorite list
+    { upsert: true, new: true } // create the document if it doesn't exist
+  ).populate('favouriteList'); // populate the favorite list with the full item documents
+  res.json({ favorite });
+   }else{
     res.redirect("/login")
    }
+  
+  
+});
+
+app.post('/favorite/remove/:id', async (req, res) => {
+  if (req.isAuthenticated()){
+  const favorite = await User.findByIdAndUpdate(
+    {_id:req.user._id},
+    { $pull: { favouriteList: req.params.id } }, // remove the item from the favorite list
+    { new: true }
+  ).populate('favouriteList');
+  res.json({ favorite });
+  }else{
+   res.redirect("/login")
+  }
+ 
+});
+
+
+app.get("/favourite", function(req,res){
+  updateData()
+
+  if (req.isAuthenticated()){
+
+    // User.findById({_id:req.user._id}, function(err,foundUser){}) to spesific user
+    
+    User.findById({_id:req.user._id}, function(err,foundUser){
+
+      User.aggregate([
+        {
+          $match:{
+           
+            "_id":foundUser._id //filter data by user id
+          }
+        },
+       
+       
+     { $lookup:{
+        from: "livedatas",
+        localField:"favouriteList",
+        foreignField: "_id",
+        as: "favourite",
+       
+       }},
+       {
+        $unwind:"$favourite"   // to open the array
+      },
+     
+       { "$project": {
+        
+        favourite:1
+       }},
+     
+      ])
+      .exec(function(err,results){
+        if(err){console.log(err);
+        }else{
+         
+          
+          
+           
+ res.render("favourite", {apiDatas: results, user: foundUser })
+          }
+     
+         //
+        })
+
+});
+        
+  }else{
+   res.redirect("/login")
+  }
+
+ 
+//   if (req.isAuthenticated()){
+//  User.findById({_id:req.user._id}, function(err,foundUser){
+//     if (err){
+//         console.log(err);
+//     } else {
+//       res.render("favourite", { apiDatas: foundUser.favouriteList, user: foundUser })
+//     }
+          
+       
+//       }).sort({"favouriteList.rank":1})
+//   }else{
+//     res.redirect("/login")
+//    }
    
 
  }); 
@@ -243,7 +360,7 @@ app.post("/favourite", function(req,res){
       const checkedItemId =(req.body.checkbox).trim() ;
     
     // delete object from favouritList Array
-    User.updateOne({"favouriteList._id":checkedItemId}, { $pull: { favouriteList: {_id:checkedItemId} } }, function(err) {
+    User.updateOne({_id:req.user._id}, { $pull: { favouriteList:checkedItemId } }, function(err) {
       if (err){
         console.log(err);
       } else{
@@ -269,7 +386,15 @@ app.get("/newEntry", function (req, res) {
     if(err){
       console.log(err);
     }else{
-      res.render("newEntry", { apiDatas: results, success:"" })
+      
+      User.findById({_id:req.user._id}, function(err,foundUser){
+        if (err){
+            console.log(err);
+        } else {
+
+      res.render("newEntry", { apiDatas: results, success:"" ,user: foundUser})
+        }
+      })
     }
   })  
    }else{
@@ -296,7 +421,10 @@ const pricePerCoin=( buyPrice / amount)
 //check if user logged?
 if (req.isAuthenticated()){
   
-
+   LiveData.find({},function(err,results){
+      if(err){
+        console.log(err);
+      }else{
    User.findById({_id:req.user._id}, function(err,foundUser){
    if (err){
        console.log(err);
@@ -328,12 +456,16 @@ if (req.isAuthenticated()){
           
        }
        foundUser.save(function(){
-       
+        res.render("newEntry", { apiDatas: results, user: foundUser, success:"New Transaction Saved Successfully!" })
     });
-   }}
-  })
+ 
+       
+      }
+    }})  
+   }})
+  }
 
- }else{
+ else{
   res.redirect("/login")
  }
 
@@ -371,13 +503,7 @@ if (req.isAuthenticated()){
 //     entry.save()
 // }
 
-LiveData.find({},function(err,results){
-  if(err){
-    console.log(err);
-  }else{
-    res.render("newEntry", { apiDatas: results, success:"New Transaction Saved Successfully!" })
-  }
-})  
+
 
 
 
@@ -394,6 +520,7 @@ app.get("/myentries", function (req, res) {
 //check if user logged?
 if (req.isAuthenticated()){
   updateData();
+  
 //get user
   User.findById({_id:req.user._id}, function(err,foundUser){
   if (err){
@@ -412,6 +539,8 @@ if (req.isAuthenticated()){
               );
               if (apiTransaction) {
                 users[i].transactions[j].currentPricePerCoin = apiTransaction.cryptoPrice;
+                users[i].transactions[j].symbol = apiTransaction.symbol;
+                users[i].transactions[j].logo = apiTransaction.logo;
                 users[i].transactions[j].currentPriceInTotal =  users[i].transactions[j].amount * users[i].transactions[j].currentPricePerCoin;
                 users[i].transactions[j].profit =users[i].transactions[j].currentPriceInTotal - users[i].transactions[j].buyPriceInTotal
                 await users[i].save();
@@ -427,7 +556,7 @@ if (req.isAuthenticated()){
       console.log(err);
     }else{
       results.forEach(element => {
-        res.render("myentries", {  newEntries: element.transactions })
+        res.render("myentries", {  newEntries: element.transactions, user: foundUser })
       });
       
      
@@ -518,7 +647,7 @@ app.get("/dashboard", function(req,res){
         as: "dashDocs",
        
        }},
-       { $set:{percent_change_7d:"$dashDocs.percent_change_7d", logo:"$dashDocs.logo"}},
+       { $set:{percent_change_7d:"$dashDocs.percent_change_7d", logo:"$dashDocs.logo", symbol:"$dashDocs.symbol"}},
       { "$project": {
        
         totalInvestment:1,
@@ -530,7 +659,8 @@ app.get("/dashboard", function(req,res){
         profit:{$subtract:["$currentValueInTotal","$totalInvestment"]},
         dashDocs:1,
         percent_change_7d:1,
-        logo:1
+        logo:1,
+        symbol:1
       }},
       {
         "$project": {
@@ -544,7 +674,8 @@ app.get("/dashboard", function(req,res){
           profit:{$subtract:["$currentValueInTotal","$totalInvestment"]},
           dashDocs:1,
           percent_change_7d:1,
-          logo:1
+          logo:1,
+          symbol:1
     
         }
       },
@@ -562,6 +693,7 @@ app.get("/dashboard", function(req,res){
           dashDocs:1,
           percent_change_7d:1,
           logo:1,
+          symbol:1
     
         }
 
@@ -569,9 +701,9 @@ app.get("/dashboard", function(req,res){
      
      
       ])
-      .sort({ "_id":1}).exec(function(err,results){console.log(results);
+      .sort({ "_id":1}).exec(function(err,results){
       
-          res.render("dashboard", {dashboard: results })
+          res.render("dashboard", {dashboard: results, user: foundUser })
         })
 
 });
@@ -584,21 +716,72 @@ app.get("/dashboard", function(req,res){
 });
 
 app.post("/dashboard", function(req,res){
-   const logo = req.body.logo
+  //convert var to kebab case to read it in url
+   const logo = _.toLower(req.body.logo)
    //check if user logged?
    if (req.isAuthenticated()){
-    res.redirect("/myentries")
+    res.redirect("/myentries/"+(logo) )
 
-    
    }else{
     res.redirect("/login")
    }
-
- 
-
-  
  
 });
+
+
+app.get("/myentries/:logo",function(req,res){
+  //return var value to original status
+  const logo =_.toUpper(req.params.logo)
+
+   //check if user logged?
+  //  if (req.isAuthenticated()){
+    
+  //  }else{
+  //   res.redirect("/login")
+  //  }
+  if (req.isAuthenticated()){
+   
+    
+    User.findById({_id:req.user._id } ,function(err,foundUser){
+      if(foundUser){
+        
+        User.aggregate([
+          {
+            $match:{
+             
+              "_id":foundUser._id //filter data by user id
+            }
+          },
+          {
+            $unwind:"$transactions"   // to open the array
+          },
+          {
+            $match:{"transactions.symbol":logo
+
+            }
+         },
+         { $set:{trans:"$transactions"}},
+        {
+          "$project": {
+            trans:1
+           
+          } 
+        } 
+         
+        ]).exec(function(err,results){
+       res.render("dashboardSelected", {  newEntries: results,user: foundUser })
+        })
+     
+  
+        
+      }else {
+        console.log(err);
+      }
+    })
+  }else{
+   res.redirect("/login")
+  }
+})
 
 //get google auth
 app.get('/auth/google',
@@ -608,8 +791,15 @@ app.get('/auth/google',
   app.get('/auth/google/secrets', 
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {
-    // Successful authentication, redirect secrets.
-    res.redirect("/secrets");
+    // Successful authentication, check if name in database.
+    User.findById({_id:req.user._id } ,function(err,foundUser){
+      if(foundUser.fName && foundUser.lName ){
+ res.redirect("/secrets");
+      }else{
+        res.redirect("/submit");
+      }
+    })
+   
   });
 
 //-----------------Get login & register-------------------------//
@@ -628,8 +818,8 @@ app.get("/secrets", function(req,res){
           console.log(err);
       } else {
           if(foundUser){
-              res.render("secrets", {name:foundUser.username})
-              console.log(foundUser);
+              res.render("secrets", {name:foundUser.fName,user: foundUser})
+             
           } 
         
       }
@@ -648,10 +838,29 @@ app.get("/submit", function(req,res){
      }else{
       res.redirect("/login")
      }
+
+
+     //if (req.isAuthenticated()){
+      //   User.findById({_id:req.user._id}, function(err,foundUser){
+      //     if(err){
+      //         console.log(err);
+      //     } else {
+      //         if(foundUser.fName ==null && foundUser.lName ==null){
+                 
+      //             res.render("submit")
+      //         } else{res.redirect("/") }
+            
+      //     }
+      // })
+         
+      //    }else{
+      //     res.redirect("/login")
+      //    }
 });
 
 app.post("/submit", function(req,res){
- const submittedSecret = req.body.secret;
+ const fName = req.body.fName;
+ const lName = req.body.lName;
  console.log(req.user);
 
  User.findById({_id:req.user._id}, function(err,foundUser){
@@ -659,15 +868,135 @@ app.post("/submit", function(req,res){
       console.log(err);
   } else {
       if (foundUser){
-          foundUser.secret = submittedSecret;
+          foundUser.fName = fName;
+          foundUser.lName = lName;
           foundUser.save(function(){
-              res.redirect("/secrets")
+              res.redirect("/wallet")
           });
       }
   }
  })
 
 });
+
+app.get("/wallet", function(req,res){
+
+  if (req.isAuthenticated()){
+    User.findById({_id:req.user._id}, function(err,foundUser){
+    if(err){
+        console.log(err);
+    } else {
+        if(foundUser){
+            res.render("wallet", {name:foundUser.fName,user: foundUser})
+           
+        } 
+      
+    }
+})
+   }else{
+    res.redirect("/login")
+   }
+
+
+  
+});
+app.post("/wallet", function(req,res){
+  const wallet = req.body.wallet;
+  User.findById({_id:req.user._id}, function(err,foundUser){
+   if (err){
+       console.log(err);
+   } else {
+       if (foundUser){
+           foundUser.walletName = wallet;
+           foundUser.save(function(){
+               res.redirect("/secrets")
+           });
+       }
+   }
+  })
+ 
+ });
+
+ //change name
+ app.get("/change-name", function(req,res){
+  
+  if (req.isAuthenticated()){
+    User.findById({_id:req.user._id}, function(err,foundUser){
+    if(err){
+        console.log(err);
+    } else {
+        if(foundUser){
+            res.render("changeName", {name:foundUser.fName,user: foundUser})
+           
+        } 
+      
+    }
+})
+   }else{
+    res.redirect("/login")
+   }
+
+});
+
+app.post("/change-name", function(req,res){
+ const fName = req.body.fName;
+ const lName = req.body.lName;
+ console.log(req.user);
+
+ User.findById({_id:req.user._id}, function(err,foundUser){
+  if (err){
+      console.log(err);
+  } else {
+      if (foundUser){
+          foundUser.fName = fName;
+          foundUser.lName = lName;
+          foundUser.save(function(){
+              res.redirect("/profile")
+          });
+      }
+  }
+ })
+
+});
+
+//change wallet name
+app.get("/change-wallet-name", function(req,res){
+
+  if (req.isAuthenticated()){
+    User.findById({_id:req.user._id}, function(err,foundUser){
+    if(err){
+        console.log(err);
+    } else {
+        if(foundUser){
+            res.render("changeWallet", {name:foundUser.fName,user: foundUser})
+           
+        } 
+      
+    }
+})
+   }else{
+    res.redirect("/login")
+   }
+
+
+  
+});
+app.post("/change-wallet-name", function(req,res){
+  const wallet = req.body.wallet;
+  User.findById({_id:req.user._id}, function(err,foundUser){
+   if (err){
+       console.log(err);
+   } else {
+       if (foundUser){
+           foundUser.walletName = wallet;
+           foundUser.save(function(){
+               res.redirect("/profile")
+           });
+       }
+   }
+  })
+ 
+ });
 
 //_________386___________
 app.get("/logout", function(req,res){
@@ -691,7 +1020,15 @@ app.post("/login", function(req,res){
       console.log(err);
   }else{
       passport.authenticate("local")(req,res, function(){
-          res.redirect("secrets");
+        // Successful authentication, check if name in database.
+    User.findById({_id:req.user._id } ,function(err,foundUser){
+      if(foundUser.fName && foundUser.lName ){
+ res.redirect("/secrets");
+      }else{
+        res.redirect("/submit");
+      }
+    })
+          
       });
   }
  })
@@ -705,13 +1042,59 @@ User.register({username: req.body.username}, req.body.password, function(err,use
       res.redirect("/register")
   } else {
       passport.authenticate("local")(req, res, function(){
-          res.redirect("/secrets")
+          res.redirect("/submit")
       })
 
   }
 })  
 
  
+})
+
+
+//profile
+app.get("/profile", function (req,res){
+
+   if (req.isAuthenticated()){
+        User.findById({_id:req.user._id}, function(err,foundUser){
+          if(err){
+              console.log(err);
+          } else {
+              res.render("profile", {user: foundUser})
+          }
+      })
+         
+         }else{
+          res.redirect("/login")
+         }
+ 
+});
+app.post("/profile", function(req,res){
+
+
+
+ 
+//check if user logged?
+if (req.isAuthenticated()){
+  
+  
+   User.findByIdAndDelete({_id:req.user._id}, function(err){
+   if (err){
+       console.log(err);
+   } else {
+    
+        res.render("/")
+    }
+  })  
+  
+  }
+
+ else{
+  res.redirect("/login")
+ }
+
+
+
 })
 
 app.listen("3000", function () {
