@@ -1,0 +1,94 @@
+<%- include('partials/header'); -%>
+
+<div class="purchaseForm ">
+
+
+
+
+
+    <form action="/import-data-from-binance" method="post"  onsubmit="return handleData()">
+
+    
+      
+
+      <h1>Import Trade History From Binance Exchange</h1>
+      <div class=" form-row ">
+      <div class="form-group col-md-6">
+        <label for="date">API KEY</label>
+        <input class="form-control" type="text" name="key"  required>
+      </div>
+
+
+      <div class="form-group col-md-6 ">
+        <label for="time">SECRET</label>
+        <input class="form-control" type="text" name="secret" required step="2">
+      </div>
+
+      <div class="form-group col-md-6">
+
+        <label for="cryptoList">Trading Pair</label>
+        <input list="cryptoList" class="form-control " name="pairs" placeholder="e.g. BTCUSDT" autocomplete="off" required />
+        <datalist id="cryptoList">
+          <%  apiDatas.forEach(function (apiData) {%>
+          <%  const symbols =(apiData.symbol) %>
+          <% if (symbols.includes("USD") && typeof symbols !== "undefined"){ %>
+          <option><%= symbols %></option>
+          <% } %>
+
+          <%  }) %>
+        
+        </datalist>
+      </div>
+
+
+      <div class="form-group col-md-12">
+        <button type="submit" class="btn  btn-success btn-lg " >Import Trade History</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  $(document).ready(function() {
+    //New Transaction button change
+    $("#side").on("change", function() {
+      if ($("#side").val() === "SELL") {
+        $("button").addClass("btn-danger");
+        $("#side").css({
+          "background-color": "#E64848"
+        })
+      } else if ($("#side").val() === "BUY") {
+        $("button").removeClass("btn-danger");
+        $("button").addClass("btn-success");
+        $("#side").css({
+          "background-color": "#59CE8F"
+        })
+      }
+
+    });
+    // hide the sccess message
+    $('#success').delay(5000).fadeOut('slow');
+
+    // must one of checkboxess checked
+    $('.checkoption').click(function() {
+      $('.checkoption').not(this).prop('checked', false);
+    });
+    $("#myInput").hide()
+
+  });
+</script>
+<script>
+  //if both checkboxes not checked
+  $("#formNewTransaction").submit(function() {
+    if (!$('.checkoption').is(':checked')) {
+      $("#chk_option_error").css("visibility", "visible");
+      return false;
+    } else {
+      $("#chk_option_error").css("visibility", "hidden");
+      return true;
+    }
+
+  });
+</script>
+
+<%- include('partials/footer'); -%>

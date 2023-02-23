@@ -1,6 +1,6 @@
 <%- include('partials/header'); -%>
 
-<div class="home content">
+<div class="home  content">
   <form action="/favourite" method="post">
 
 
@@ -33,7 +33,7 @@
               %>
 
         <tr>
-          <td> <input type="checkbox" id="checkbox" class="glyphicon glyphicon-star-empty" name="checkbox" value="<%= apiData.favourite._id %> " onChange="this.form.submit()"></td>
+          <td> <input  type="checkbox" id="checkbox" class="glyphicon glyphicon-star-empty" name="checkbox" value="<%= apiData.favourite._id %> "  onChange="this.form.submit()" ></td>
           <td><%= rank %></td>
 
           <td><a href="https://coinmarketcap.com/currencies/<%= cryptoNamereplace %>"><img class="logo" src="<%= logo %> " alt=""></a> <%= cryptoName %> <h6><%= symbol %></h6>

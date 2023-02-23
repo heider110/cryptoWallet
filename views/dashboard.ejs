@@ -16,7 +16,7 @@ const holdValue = function () {
   return sum;
 } ;
 
-const allProfit= holdValue()-allInvseted();
+const allProfit= holdValue()-allInvseted()|| 0;
 const  allRoi= allProfit / allInvseted() || 0 
 
 const maxReturnValue = Math.max(...dashboard.map(o => o.roi))
@@ -89,7 +89,7 @@ function shortNumber(num) {
 
     <div class="note ">
       <h1>Best Return</h1>
-      <p class="redGreed"> <%=errResolve(maxReturnName)%><%=percent(maxReturnValue)%></p>
+      <p class="redGreed"> <%=errResolve(maxReturnName)%> <%=percent(maxReturnValue)%></p>
     </div>
 
     <div class="note ">

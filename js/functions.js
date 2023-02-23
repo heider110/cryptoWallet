@@ -52,7 +52,7 @@ exports.idIncrement = function () {
 // fetch Api function
 exports.getApi = async function (callback){
   const start = 1
-    const limit = 300
+    const limit = 3000
     const convert = "USD"
     const apiKey = process.env.API_KEY
     const url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=" + start + "&limit=" + limit + "&convert=" + convert + "&CMC_PRO_API_KEY=" + apiKey
@@ -67,5 +67,24 @@ exports.getApi = async function (callback){
   
  
   catch(err) {console.log(err);}
+};
+
+// fetch Api function
+exports.exchangeInfo = async function (callback){
+  
+    const url = "https://api.binance.me/api/v3/exchangeInfo"
+    
+  try{
+  let res = await fetch(url)
+  let data = await res.json()
+ 
+    return callback(data.symbols)
+    
+  }
+  
+ 
+  catch(err) {console.log(err);}
 }
+
+
 

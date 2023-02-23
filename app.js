@@ -5,6 +5,9 @@ const func = require(__dirname + "/js/functions.js")
 const ejs = require("ejs");
 var _ = require('lodash');
 
+//__binance
+const Binance = require('node-binance-api');
+
 const mongoose = require('mongoose');
 const { stringify } = require("querystring");
 
@@ -36,6 +39,24 @@ app.use(passport.session());
 // new connection and new database 
 mongoose.connect('mongodb://127.0.0.1:27017/cryptoWalletDB', {useNewUrlParser: true});
 
+
+
+// binance.exchangeInfo((error, data) => {
+//   if (error) {
+//     console.error(error);
+//     return;
+//   }
+//   const symbols = data.symbols.map(symbol => symbol.symbol);
+//   symbols.forEach(symbol => {
+//     binance.trades(symbol, (error, trades) => {
+//       if (error) {
+//         console.error(error);
+//         return;
+//       }
+//       console.log(trades);
+//     });
+//   });
+// });
 
 
 //new Schema
@@ -137,34 +158,34 @@ function updateData(){
 
      //first time to save data
 
-    //  const api = new LiveData({
-    //   rank: data.data[i].cmc_rank,
-    //     cryptoName: data.data[i].name,
-    //     symbol: data.data[i].symbol,
-    //     cryptoPrice:Number(data.data[i].quote.USD.price),//func.currency
-    //     percent_change_1h: (data.data[i].quote.USD.percent_change_1h),//func.percent
-    //     percent_change_24h: (data.data[i].quote.USD.percent_change_24h),//func.percent
-    //     percent_change_7d: (data.data[i].quote.USD.percent_change_7d),//func.percent
-    //     cryptoId: cryptoId,
-    //     logo: logo
-    //  });
-    //  api.save()
-
-      LiveData.findOneAndUpdate({cryptoId:cryptoId},{
-        rank: data.data[i].cmc_rank,
+     const api = new LiveData({
+      rank: data.data[i].cmc_rank,
         cryptoName: data.data[i].name,
         symbol: data.data[i].symbol,
-        cryptoPrice:(data.data[i].quote.USD.price),//func.currency
+        cryptoPrice:Number(data.data[i].quote.USD.price),//func.currency
         percent_change_1h: (data.data[i].quote.USD.percent_change_1h),//func.percent
         percent_change_24h: (data.data[i].quote.USD.percent_change_24h),//func.percent
         percent_change_7d: (data.data[i].quote.USD.percent_change_7d),//func.percent
         cryptoId: cryptoId,
         logo: logo
-      },function(err,res){
-        if(err){
-          console.log(err); 
-        }
-      })
+     });
+     api.save()
+
+      // LiveData.findOneAndUpdate({cryptoId:cryptoId},{
+      //   rank: data.data[i].cmc_rank,
+      //   cryptoName: data.data[i].name,
+      //   symbol: data.data[i].symbol,
+      //   cryptoPrice:(data.data[i].quote.USD.price),//func.currency
+      //   percent_change_1h: (data.data[i].quote.USD.percent_change_1h),//func.percent
+      //   percent_change_24h: (data.data[i].quote.USD.percent_change_24h),//func.percent
+      //   percent_change_7d: (data.data[i].quote.USD.percent_change_7d),//func.percent
+      //   cryptoId: cryptoId,
+      //   logo: logo
+      // },function(err,res){
+      //   if(err){
+      //     console.log(err); 
+      //   }
+      // })
     }
     });
   };
@@ -201,50 +222,45 @@ app.get("/", function (req, res) {
   
   
 
-
-// app.post("/", function(req,res){
-
-// const checkedItemId =(req.body.checkbox);
-
-
-//   if (req.isAuthenticated()){
-//     //if(typeof checkedItemId !== "undefined"){
-     
-     
-//        // Find the object you want to push
-// // LiveData.findById({_id:checkedItemId}, function(err, obj) {
-// //   if (err){console.log(err);
-// //   }else{console.log(obj);}
-  
-//   // Push the object to the other model .... $addToSet add if not exist .... instead $push duplicate
-//   // User.findByIdAndUpdate({_id:req.user._id}, { $addToSet: { favouriteList: checkedItemId} }, function(err) {
-//   //   if (err) {
-//   //     console.log(err);
-//   //   }
-//   // });
-// // });
-//     //}
- 
-
-//    }else{
-//     res.redirect("/login")
-//    }
- 
- 
-
-
-// LiveData.findOneAndUpdate({cryptoName:checkedItemId}, 
-//   {$set:{favourite:true}},function(err, results){
-//   if(!err){
-//    console.log("successfully added to favourite");
-// } else {
-//   console.log(err);
-// }
-//  res.redirect("/")
-// })
-//})
-
 //-----------------Faovourite-------------------------//
+
+app.get("/favourite", function(req,res){
+  if (req.isAuthenticated()){
+    updateData()
+    User.findById({_id:req.user._id}, function(err,foundUser){
+      User.aggregate([
+        {
+          $match:{
+            "_id":foundUser._id //filter data by user id
+          }
+        },
+     { $lookup:{
+        from: "livedatas",
+        localField:"favouriteList",
+        foreignField: "_id",
+        as: "favourite",
+       }},
+       {
+        $unwind:"$favourite"   // to open the array
+      },
+       { "$project": {
+        
+        favourite:1
+       }},
+     
+      ])
+      .exec(function(err,results){
+        if(err){console.log(err);
+        }else{
+
+ res.render("favourite", {apiDatas: results, user: foundUser })
+          }
+        })
+});    
+  }else{
+   res.redirect("/login")
+  }
+ }); 
 
 app.post('/favorite/add/:id', async (req, res) => {
     if (req.isAuthenticated()){
@@ -258,8 +274,6 @@ const favorite = await User.findByIdAndUpdate(
    }else{
     res.redirect("/login")
    }
-  
-  
 });
 
 app.post('/favorite/remove/:id', async (req, res) => {
@@ -276,89 +290,15 @@ app.post('/favorite/remove/:id', async (req, res) => {
  
 });
 
-
-app.get("/favourite", function(req,res){
-  updateData()
-
-  if (req.isAuthenticated()){
-
-    // User.findById({_id:req.user._id}, function(err,foundUser){}) to spesific user
-    
-    User.findById({_id:req.user._id}, function(err,foundUser){
-
-      User.aggregate([
-        {
-          $match:{
-           
-            "_id":foundUser._id //filter data by user id
-          }
-        },
-       
-       
-     { $lookup:{
-        from: "livedatas",
-        localField:"favouriteList",
-        foreignField: "_id",
-        as: "favourite",
-       
-       }},
-       {
-        $unwind:"$favourite"   // to open the array
-      },
-     
-       { "$project": {
-        
-        favourite:1
-       }},
-     
-      ])
-      .exec(function(err,results){
-        if(err){console.log(err);
-        }else{
-         
-          
-          
-           
- res.render("favourite", {apiDatas: results, user: foundUser })
-          }
-     
-         //
-        })
-
-});
-        
-  }else{
-   res.redirect("/login")
-  }
-
- 
-//   if (req.isAuthenticated()){
-//  User.findById({_id:req.user._id}, function(err,foundUser){
-//     if (err){
-//         console.log(err);
-//     } else {
-//       res.render("favourite", { apiDatas: foundUser.favouriteList, user: foundUser })
-//     }
-          
-       
-//       }).sort({"favouriteList.rank":1})
-//   }else{
-//     res.redirect("/login")
-//    }
-   
-
- }); 
- 
- 
-
 app.post("/favourite", function(req,res){
 
   
     if (req.isAuthenticated()){
-
+ console.log(req.body.checkbox);  
       // get the id value from favourite.ejs
       const checkedItemId =(req.body.checkbox).trim() ;
-    
+     
+    console.log(typeof(checkedItemId));
     // delete object from favouritList Array
     User.updateOne({_id:req.user._id}, { $pull: { favouriteList:checkedItemId } }, function(err) {
       if (err){
@@ -1095,8 +1035,134 @@ if (req.isAuthenticated()){
 
 
 
-})
+});
 
+app.get("/import-data-from-binance",function(req,res){
+  if (req.isAuthenticated()){
+
+     func.exchangeInfo(function(data){
+res.render("import", {apiDatas: data, success:""})    
+  })
+       }else{
+        res.redirect("/login")
+       }
+ 
+});
+
+app.post("/import-data-from-binance", function(req,res){
+  const apiKey=req.body.key;
+const secret =req.body.secret;
+const tradePair =req.body.pairs
+
+  if (req.isAuthenticated()){
+
+    const binance = new Binance().options({
+      APIKEY:apiKey,
+      APISECRET:secret,
+      'family': 4,
+      useServerTime: true,
+      recvWindow: 60000, // Set a higher recvWindow to increase response timeout
+      verbose: true,
+      log: log => {
+        console.log(log); // You can create your own logger here, or disable console output
+      }
+    });
+    
+    binance.trades(tradePair, (error, trades, symbol) => {
+      if(error){
+        console.log(error.statusMessage);
+      }else{
+       
+        func.exchangeInfo(function(data){
+         data.map(e=>{
+          if(e.symbol==symbol){
+            const symbols =e.baseAsset;
+            LiveData.findOne({symbol:symbols},function(err,results){
+              if(err){
+                console.log(err);
+              }else{
+             const name=(results.cryptoName);  
+
+
+
+trades.map(e=>{
+ const id = e.id
+const date = new Date(e.time);
+const  year= date.getFullYear();
+const month= date.getMonth();
+const day = date.getDate();
+const hour= date.getHours();
+const minutes= date.getMinutes();
+const seconds = date.getSeconds();
+const newDate= year+"-"+month+"-"+day;
+const time=hour+":"+minutes+":"+seconds;
+const  side= e.isBuyer == false ? "SELL" : "BUY";
+
+ const amount=e.qty;
+const  buyPricePerCoin=e.price;
+ const buyPriceInTotal=e.quoteQty;
+ const newObjs=[{
+  id:id,
+  date: newDate,
+  time: time,
+  side:side,
+  name:name,
+  amount:amount,
+  buyPricePerCoin:buyPricePerCoin,
+  buyPriceInTotal:buyPriceInTotal
+ }]
+newObjs.map(obj=>{
+   User.findOneAndUpdate({_id:req.user._id, "transactions.id":{$ne:obj.id}},
+            {$addToSet:{transactions:newObjs}},
+            { upsert: true, new:true, useFindAndModify:false},
+            function(err,newObj){
+            if(err){
+              console.log(err);
+            }else if(!newObj){
+              console.log("no Transactions found");
+            }else{
+              console.log(newObj.length +"Transactions Found");
+            }
+           })
+})
+ 
+// User.findOne({_id:req.user._id,"transactions.id":{$ne:newObjs.id}},function(err,obj){
+// if(err){
+//   console.log(err);
+// }else{
+//   console.log(obj);
+// }
+// })
+  
+  
+})
+       
+
+
+              
+              }
+            })
+
+
+              
+          }
+
+         
+         })    
+            })
+
+        //  console.info(symbol+" trade history", trades);
+      }
+      
+    });
+    // console.log(apiKey,secret,tradePair);
+    res.redirect("/import-data-from-binance")
+    
+       }else{
+        res.redirect("/login")
+       }
+ 
+});
 app.listen("3000", function () {
   console.log("server is running...")
 })
