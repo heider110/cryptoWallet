@@ -68,7 +68,7 @@ router.get('/auth/google',
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {
     // Successful authentication, redirect secrets.
-    res.redirect("/secrets");
+    res.redirect("/welcome");
   });
 
   
@@ -91,7 +91,7 @@ router.get('/auth/google',
              console.log(err);
          }else{
              passport.authenticate("local")(req,res, function(){
-                 res.redirect("secrets");
+                 res.redirect("welcome");
              });
          }
         })
@@ -107,7 +107,7 @@ router.get('/auth/google',
                 res.redirect("/register")
             } else {
                 passport.authenticate("local")(req, res, function(){
-                    res.redirect("/secrets")
+                    res.redirect("/welcome")
                 })
         
             }

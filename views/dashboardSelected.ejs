@@ -96,18 +96,18 @@
   });
 </script>
 <script>
-  // change color basen on value
-$(document).ready(function() {
-  $(".redGreed").each(function() {
-    var value = $(this).text();
+   // change color basen on value
+   $(document).ready(function() {
+    $(".redGreed").each(function() {
+      var value = $(this).text();
 
-    if (value.includes("-")) {
-      $(this).addClass("red");
-    } else {
-      $(this).addClass("green");
-    };
-  })
-});
+      if (value.includes("-")) {
+        $(this).addClass("red");
+      } else {
+        $(this).addClass("green");
+      };
+    })
+  });
 </script>
 
 <% // Functions to retuns number in currency or precentage format 

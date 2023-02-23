@@ -18,11 +18,11 @@ body{
 }
 .note h1 {
   font-size:1.4em;
-  margin-bottom: 20px;
-  color: #4e4e4e;
+  margin-bottom: 30%;
+
 }
 .note p {
-  font-size: 1.5em;
+  font-size: 2em;
   margin-bottom: 10px;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -31,8 +31,6 @@ body{
 #dashboardBoxes{
   margin:auto;
   width: 50%;
- 
- 
   font-size: 1.2em;
   font-weight: bold;
  width: 94%;
@@ -53,7 +51,6 @@ body{
   color: #012169;
   margin: 0 3%;
   padding: 1%;
-  
   border: 0px solid #009cde;
   box-shadow: 1px 1px 7px #ccc;
   background:center  / contain no-repeat url("/images/yuan.png"),linear-gradient(to top , #f6f7f8, #009cde); ; 
@@ -109,8 +106,6 @@ body{
 /* navbar */
 .navbar {
  margin: 0 3% 0 ;
- 
-  
   font-size: 1.2em;
   font-weight: bold;
  width: 94%;
@@ -441,4 +436,23 @@ font-size: 2em;
 .form-group{
  
 margin: 0 0 2% 0 ;
+}
+.car{
+  background: #fff;
+  border-radius: 7px;
+  box-shadow: 0 2px 5px #ccc;
+  padding: 10px;
+  width: 240px;
+  height: 200px;
+ margin: 2%;
+  
+  text-align: center;
+}
+a{
+  text-decoration: none;
+  color:#000 ;
+}
+a:hover{
+  text-decoration: none;
+  
 }

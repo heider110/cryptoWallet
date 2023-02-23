@@ -12,3 +12,15 @@ Watch all Transactions:
 
 Register Form:
 !["Register Form"](public/images/register.png)
+
+Login Form:
+!["Login Form"](public/images/login.png)
+
+Dashboard:
+![](public/images/dashboard.png)
+
+Home Page:
+![](public/images/home.png)
+
+Favourite Page:
+![](public/images/fav.png)
