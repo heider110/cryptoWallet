@@ -11,30 +11,34 @@ const Binance = require('node-binance-api');
 const mongoose = require('mongoose');
 const { stringify } = require("querystring");
 
-//Lession386 
+//LocalAuth 
 const session = require('express-session');
 const passport = require('passport');
-const passportLocaMongoose = require('passport-local-mongoose');
-//google Oauth
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const findOrCreate = require('mongoose-findorcreate')
-//-------
-
+//const passportLocaMongoose = require('passport-local-mongoose');
+const User = require("./models/users")
+const auth=require("./models/passport");
+const isAuth=require("./models/isAuth");
+//LocalAuth and for google
 const app = express();
+app.use(express.static(__dirname +"public"));
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
-app.set("view engine", "ejs");
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(__dirname + '/public'));
-
-//Lession386 
+//LocalAuth and for google
 app.use(session({
-  secret: "type any thing",
-  resave: false,
-  saveUninitialized: false
+    secret: "type any thing",
+    resave: false,
+    saveUninitialized: false
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use("/",auth)
 //-------
+
+
+
 
 // new connection and new database 
 mongoose.connect('mongodb://127.0.0.1:27017/cryptoWalletDB', {useNewUrlParser: true});
@@ -73,79 +77,10 @@ const apiSchema =  new mongoose.Schema({
   favourite:Boolean
  })
 
- const entrySchema = new mongoose.Schema({
-  id:Number,
-  date: String,
-  time: String,
-  side: String,
-  name: String,
-  symbol:String,
-  amount:Number,
-  buyPricePerCoin: Number,
-  buyPriceInTotal: Number,
-  currentPricePerCoin: Number,
-  currentPriceInTotal: Number,
-  profit: Number,
-  logo:String
-  
- })
-
- //user auth
-const userSchema =  new mongoose.Schema({
-  username : String,
-  fName:String,
-  lName:String,
-  password : String,
-  googleId: String,
-  secret: String,
-  walletName: String,
-  transactions: [entrySchema],
-  favouriteList: [{ type:mongoose.Schema.Types.ObjectId, ref: "LiveData"}],
-  createsAt: {
-    type: Date,
-    default: Date.now
-  }
- })
-//----auth
-
-//Lession386 
-userSchema.plugin(passportLocaMongoose);
-userSchema.plugin(findOrCreate);
 
 //new model
 const LiveData = mongoose.model("LiveData", apiSchema)
-const Entry = mongoose.model("Entry",entrySchema)
 
-//auth
-const User = mongoose.model("User", userSchema)
-    //Lession386 
-    passport.use(User.createStrategy());
-
-    passport.serializeUser(function(user, done){
-      done(null, user.id)
-  });
-  passport.deserializeUser(function(id, done){
-      User.findById(id, function(err, user){
-          done(err, user)
-      })
-  }); 
-
-  //google Auth
-  passport.use(new GoogleStrategy({
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
-    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    console.log(profile.displayName);
-    User.findOrCreate({ googleId: profile.id , username:profile.displayName}, function (err, user) {
-      return cb(err, user);
-    });
-  }
-));
-
-// ---auth
 
 function updateData(){
   // get the Data from API source
@@ -224,8 +159,8 @@ app.get("/", function (req, res) {
 
 //-----------------Faovourite-------------------------//
 
-app.get("/favourite", function(req,res){
-  if (req.isAuthenticated()){
+app.get("/favourite",isAuth.ensureAuthenticated, function(req,res){
+  
     updateData()
     User.findById({_id:req.user._id}, function(err,foundUser){
       User.aggregate([
@@ -257,13 +192,11 @@ app.get("/favourite", function(req,res){
           }
         })
 });    
-  }else{
-   res.redirect("/login")
-  }
+  
  }); 
 
-app.post('/favorite/add/:id', async (req, res) => {
-    if (req.isAuthenticated()){
+app.post('/favorite/add/:id',isAuth.ensureAuthenticated, async (req, res) => {
+  
 
 const favorite = await User.findByIdAndUpdate(
   {_id:req.user._id}, // find the first (and only) favorite document
@@ -271,29 +204,25 @@ const favorite = await User.findByIdAndUpdate(
     { upsert: true, new: true } // create the document if it doesn't exist
   ).populate('favouriteList'); // populate the favorite list with the full item documents
   res.json({ favorite });
-   }else{
-    res.redirect("/login")
-   }
+  
 });
 
-app.post('/favorite/remove/:id', async (req, res) => {
-  if (req.isAuthenticated()){
+app.post('/favorite/remove/:id',isAuth.ensureAuthenticated, async (req, res) => {
+  
   const favorite = await User.findByIdAndUpdate(
     {_id:req.user._id},
     { $pull: { favouriteList: req.params.id } }, // remove the item from the favorite list
     { new: true }
   ).populate('favouriteList');
   res.json({ favorite });
-  }else{
-   res.redirect("/login")
-  }
+ 
  
 });
 
-app.post("/favourite", function(req,res){
+app.post("/favourite",isAuth.ensureAuthenticated, function(req,res){
 
   
-    if (req.isAuthenticated()){
+  
  console.log(req.body.checkbox);  
       // get the id value from favourite.ejs
       const checkedItemId =(req.body.checkbox).trim() ;
@@ -309,18 +238,16 @@ app.post("/favourite", function(req,res){
       }
     });
  
-     }else{
-      res.redirect("/login")
-     }
+    
 
  
 });
 
 //-----------------New Entry-------------------------//
-app.get("/newEntry", function (req, res) {
+app.get("/newEntry", isAuth.ensureAuthenticated,function (req, res) {
 
   //check if user logged?
-  if (req.isAuthenticated()){
+ 
     //get coins name
      LiveData.find({},function(err,results){
     if(err){
@@ -337,9 +264,7 @@ app.get("/newEntry", function (req, res) {
       })
     }
   })  
-   }else{
-    res.redirect("/login")
-   }
+   
 
  
 
@@ -347,7 +272,7 @@ app.get("/newEntry", function (req, res) {
   
 })
 
-app.post("/newEntry", function (req, res) {
+app.post("/newEntry",isAuth.ensureAuthenticated, function (req, res) {
 
   
 
@@ -359,7 +284,7 @@ var priceTotal = (amount * buyPrice)
 const pricePerCoin=( buyPrice / amount)
  
 //check if user logged?
-if (req.isAuthenticated()){
+
   
    LiveData.find({},function(err,results){
       if(err){
@@ -403,11 +328,7 @@ if (req.isAuthenticated()){
       }
     }})  
    }})
-  }
-
- else{
-  res.redirect("/login")
- }
+  
 
 
  
@@ -455,10 +376,9 @@ if (req.isAuthenticated()){
 })
 
 //-----------------My Entry-------------------------//
-app.get("/myentries", function (req, res) {
+app.get("/myentries",isAuth.ensureAuthenticated, function (req, res) {
 
-//check if user logged?
-if (req.isAuthenticated()){
+
   updateData();
   
 //get user
@@ -506,16 +426,14 @@ if (req.isAuthenticated()){
   }}
  })
 
-}else{
- res.redirect("/login")
-}
+
 
 });
 
 //POST MYENTRY
-app.post("/myentries", function(req,res){
+app.post("/myentries",isAuth.ensureAuthenticated, function(req,res){
  
-  if (req.isAuthenticated()){
+ 
      //delete selected object
     const ObjectId =(req.body.delete).trim() ;
 console.log(ObjectId);
@@ -528,16 +446,14 @@ console.log(ObjectId);
   }
  
  })
-   }else{
-    res.redirect("/login")
-   }
+  
  
 });
 
 //-----------------Dashboard-------------------------//
-app.get("/dashboard", function(req,res){
+app.get("/dashboard",isAuth.ensureAuthenticated, function(req,res){
 
-  if (req.isAuthenticated()){
+ 
 
     // User.findById({_id:req.user._id}, function(err,foundUser){}) to spesific user
     
@@ -648,38 +564,28 @@ app.get("/dashboard", function(req,res){
 
 });
         
-  }else{
-   res.redirect("/login")
-  }
+ 
 
  
 });
 
-app.post("/dashboard", function(req,res){
+app.post("/dashboard",isAuth.ensureAuthenticated, function(req,res){
   //convert var to kebab case to read it in url
    const logo = _.toLower(req.body.logo)
    //check if user logged?
-   if (req.isAuthenticated()){
+   
     res.redirect("/myentries/"+(logo) )
 
-   }else{
-    res.redirect("/login")
-   }
+   
  
 });
 
 
-app.get("/myentries/:logo",function(req,res){
+app.get("/myentries/:logo",isAuth.ensureAuthenticated,function(req,res){
   //return var value to original status
   const logo =_.toUpper(req.params.logo)
 
-   //check if user logged?
-  //  if (req.isAuthenticated()){
-    
-  //  }else{
-  //   res.redirect("/login")
-  //  }
-  if (req.isAuthenticated()){
+ 
    
     
     User.findById({_id:req.user._id } ,function(err,foundUser){
@@ -718,41 +624,14 @@ app.get("/myentries/:logo",function(req,res){
         console.log(err);
       }
     })
-  }else{
-   res.redirect("/login")
-  }
+ 
 })
 
-//get google auth
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ["profile"] })
-  );
-
-  app.get('/auth/google/secrets', 
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  function(req, res) {
-    // Successful authentication, check if name in database.
-    User.findById({_id:req.user._id } ,function(err,foundUser){
-      if(foundUser.fName && foundUser.lName ){
- res.redirect("/secrets");
-      }else{
-        res.redirect("/submit");
-      }
-    })
-   
-  });
-
-//-----------------Get login & register-------------------------//
-app.get("/login", function(req,res){
-  res.render("login");
-});
-app.get("/register", function(req,res){
-  res.render("register");
-});
 
 
-app.get("/secrets", function(req,res){
-  if (req.isAuthenticated()){
+
+app.get("/secrets",isAuth.ensureAuthenticated, function(req,res){
+  
       User.findById({_id:req.user._id}, function(err,foundUser){
       if(err){
           console.log(err);
@@ -764,20 +643,16 @@ app.get("/secrets", function(req,res){
         
       }
   })
-     }else{
-      res.redirect("/login")
-     }
+    
 
   //to find all secret not equal null
   
 });
 
-app.get("/submit", function(req,res){
-  if (req.isAuthenticated()){
+app.get("/submit",isAuth.ensureAuthenticated, function(req,res){
+  
       res.render("submit")
-     }else{
-      res.redirect("/login")
-     }
+    
 
 
      //if (req.isAuthenticated()){
@@ -798,7 +673,7 @@ app.get("/submit", function(req,res){
       //    }
 });
 
-app.post("/submit", function(req,res){
+app.post("/submit",isAuth.ensureAuthenticated, function(req,res){
  const fName = req.body.fName;
  const lName = req.body.lName;
  console.log(req.user);
@@ -819,9 +694,9 @@ app.post("/submit", function(req,res){
 
 });
 
-app.get("/wallet", function(req,res){
+app.get("/wallet",isAuth.ensureAuthenticated, function(req,res){
 
-  if (req.isAuthenticated()){
+  
     User.findById({_id:req.user._id}, function(err,foundUser){
     if(err){
         console.log(err);
@@ -833,14 +708,12 @@ app.get("/wallet", function(req,res){
       
     }
 })
-   }else{
-    res.redirect("/login")
-   }
+   
 
 
   
 });
-app.post("/wallet", function(req,res){
+app.post("/wallet",isAuth.ensureAuthenticated, function(req,res){
   const wallet = req.body.wallet;
   User.findById({_id:req.user._id}, function(err,foundUser){
    if (err){
@@ -858,9 +731,9 @@ app.post("/wallet", function(req,res){
  });
 
  //change name
- app.get("/change-name", function(req,res){
+ app.get("/change-name",isAuth.ensureAuthenticated, function(req,res){
   
-  if (req.isAuthenticated()){
+  
     User.findById({_id:req.user._id}, function(err,foundUser){
     if(err){
         console.log(err);
@@ -872,13 +745,11 @@ app.post("/wallet", function(req,res){
       
     }
 })
-   }else{
-    res.redirect("/login")
-   }
+   
 
 });
 
-app.post("/change-name", function(req,res){
+app.post("/change-name",isAuth.ensureAuthenticated, function(req,res){
  const fName = req.body.fName;
  const lName = req.body.lName;
  console.log(req.user);
@@ -900,9 +771,9 @@ app.post("/change-name", function(req,res){
 });
 
 //change wallet name
-app.get("/change-wallet-name", function(req,res){
+app.get("/change-wallet-name",isAuth.ensureAuthenticated, function(req,res){
 
-  if (req.isAuthenticated()){
+  
     User.findById({_id:req.user._id}, function(err,foundUser){
     if(err){
         console.log(err);
@@ -914,14 +785,11 @@ app.get("/change-wallet-name", function(req,res){
       
     }
 })
-   }else{
-    res.redirect("/login")
-   }
 
 
   
 });
-app.post("/change-wallet-name", function(req,res){
+app.post("/change-wallet-name",isAuth.ensureAuthenticated, function(req,res){
   const wallet = req.body.wallet;
   User.findById({_id:req.user._id}, function(err,foundUser){
    if (err){
@@ -938,64 +806,12 @@ app.post("/change-wallet-name", function(req,res){
  
  });
 
-//_________386___________
-app.get("/logout", function(req,res){
-//method comes from passport
-req.logout(function(err) {
-  if (err) { return next(err); }
-  res.redirect('/');
-});
-});
-
-
-app.post("/login", function(req,res){
- const user = new User({
-  username: req.body.username,
-  password: req.body.password
- });
-
- //login()method comes from passport
- req.login(user, function(err){
-  if(err){
-      console.log(err);
-  }else{
-      passport.authenticate("local")(req,res, function(){
-        // Successful authentication, check if name in database.
-    User.findById({_id:req.user._id } ,function(err,foundUser){
-      if(foundUser.fName && foundUser.lName ){
- res.redirect("/secrets");
-      }else{
-        res.redirect("/submit");
-      }
-    })
-          
-      });
-  }
- })
-})
-
-app.post("/register", function(req,res){
-//register( methods comes from passport local mongoose)
-User.register({username: req.body.username}, req.body.password, function(err,user){
-  if(err){
-      console.log(err);
-      res.redirect("/register")
-  } else {
-      passport.authenticate("local")(req, res, function(){
-          res.redirect("/submit")
-      })
-
-  }
-})  
-
- 
-})
 
 
 //profile
-app.get("/profile", function (req,res){
+app.get("/profile",isAuth.ensureAuthenticated, function (req,res){
 
-   if (req.isAuthenticated()){
+  
         User.findById({_id:req.user._id}, function(err,foundUser){
           if(err){
               console.log(err);
@@ -1004,19 +820,10 @@ app.get("/profile", function (req,res){
           }
       })
          
-         }else{
-          res.redirect("/login")
-         }
+        
  
 });
-app.post("/profile", function(req,res){
-
-
-
- 
-//check if user logged?
-if (req.isAuthenticated()){
-  
+app.post("/profile",isAuth.ensureAuthenticated, function(req,res){
   
    User.findByIdAndDelete({_id:req.user._id}, function(err){
    if (err){
@@ -1026,35 +833,25 @@ if (req.isAuthenticated()){
         res.render("/")
     }
   })  
-  
-  }
-
- else{
-  res.redirect("/login")
- }
-
-
 
 });
 
-app.get("/import-data-from-binance",function(req,res){
-  if (req.isAuthenticated()){
+app.get("/import-data-from-binance",isAuth.ensureAuthenticated,function(req,res){
+
 
      func.exchangeInfo(function(data){
 res.render("import", {apiDatas: data, success:""})    
   })
-       }else{
-        res.redirect("/login")
-       }
+      
  
 });
 
-app.post("/import-data-from-binance", function(req,res){
+app.post("/import-data-from-binance",isAuth.ensureAuthenticated, function(req,res){
   const apiKey=req.body.key;
 const secret =req.body.secret;
 const tradePair =req.body.pairs
 
-  if (req.isAuthenticated()){
+  
 
     const binance = new Binance().options({
       APIKEY:apiKey,
@@ -1158,9 +955,7 @@ newObjs.map(obj=>{
     // console.log(apiKey,secret,tradePair);
     res.redirect("/import-data-from-binance")
     
-       }else{
-        res.redirect("/login")
-       }
+      
  
 });
 app.listen("3000", function () {
