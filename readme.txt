@@ -3,8 +3,8 @@ All you have to do is register an account either via your e-mail or Google and t
 
 ![To Add New Transaction](images/newTrans.jpg)
 
-![To Import Your Transactions From Binance](images/binanceImport.jpg)
+![To Import Your Transactions From Binance](images/binanceImport.png)
 
-![Watch all Transactions](images/trans.png)
+![Watch all Transactions](/publicimages/trans.png)
 
-![Register Form](images/register.jpg)
+![Register Form](public/images/register.png)
