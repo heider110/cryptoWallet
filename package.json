@@ -8,7 +8,7 @@
     "start": "node app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Haidar Alkhazaly",
   "license": "ISC",
 
   "dependencies": {

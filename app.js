@@ -719,6 +719,7 @@ app.post("/import-data-from-binance", isAuth.ensureAuthenticated, function (req,
   // console.log(apiKey,secret,tradePair);
   res.redirect("/import-data-from-binance")
 });
-app.listen("3000", function () {
+const port = proccess.env.PORT || 3000
+app.listen(port, function () {
   console.log("server is running...")
 })
