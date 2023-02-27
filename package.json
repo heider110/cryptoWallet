@@ -1,9 +1,7 @@
 {
   "name": "crypto",
   "version": "1.0.0",
-  "engines": {
-    "node": "18.13.0"
-  },
+ 
   "description": "cryptoWallet",
   "main": "app.js",
   "scripts": {
