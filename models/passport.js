@@ -67,8 +67,20 @@ router.get('/auth/google',
   router.get('/auth/google/secrets', 
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {
-    // Successful authentication, redirect secrets.
+    User.findOne({ _id: req.user._id}, function (err, user) {
+      if(err){
+        return done(err);
+      }
+       if(!user.fName){
+        res.redirect("/submit");
+       
+      }else{
+        // Successful authentication, redirect secrets.
     res.redirect("/welcome");
+      }
+        
+    });
+   
   });
 
   
@@ -107,7 +119,7 @@ router.get('/auth/google',
                 res.redirect("/register")
             } else {
                 passport.authenticate("local")(req, res, function(){
-                    res.redirect("/welcome")
+                    res.redirect("/submit")
                 })
         
             }

@@ -29,7 +29,7 @@
         <label for="cryptoList">Trading Pair</label>
         <input list="cryptoList" class="form-control " name="pairs" placeholder="e.g. BTCUSDT" autocomplete="off" required />
         <datalist id="cryptoList">
-          <% if ( typeof apiData !== "undefined"){ %>
+         
           <%  apiDatas.forEach(function (apiData) {%>
           <%  const symbols =(apiData.symbol) %>
           <% if (symbols.includes("USD") && typeof symbols !== "undefined"){ %>
@@ -37,7 +37,7 @@
           <% } %>
 
           <%  }) %>
-          <%  } %>
+         
         </datalist>
       </div>
 

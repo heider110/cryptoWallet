@@ -52,7 +52,7 @@ exports.idIncrement = function () {
 // fetch Api function
 exports.getApi = async function (callback){
   const start = 1
-    const limit = 3000
+    const limit = 2000
     const convert = "USD"
     const apiKey = process.env.API_KEY2
     const url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=" + start + "&limit=" + limit + "&convert=" + convert + "&CMC_PRO_API_KEY=" + apiKey

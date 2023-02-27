@@ -41,7 +41,7 @@ app.use(express.static(__dirname + '/public'));
 //---------End app.use-------------
 
 // new connection and new database 
-mongoose.connect('mongodb://127.0.0.1:27017/cryptoWalletDB', { useNewUrlParser: true });
+mongoose.connect('mongodb+srv://admin-haidar:test123@cluster0.4vqfkjo.mongodb.net/cryptoWalletDB', { useNewUrlParser: true });
 
 
 function updateData() {
@@ -72,7 +72,7 @@ function updateData() {
       //  });
       //  api.save()
       // };
-      //truncateApi();
+      // truncateApi();
 
 
       LiveData.findOneAndUpdate({ cryptoId: cryptoId }, {
@@ -99,7 +99,7 @@ function updateData() {
 app.get("/", function (req, res) {
 
 
-  //updateData()
+  updateData()
   LiveData.find({}, function (err, data) {
     if (!err) {
       //check if user logged?
@@ -620,12 +620,22 @@ app.post("/profile", isAuth.ensureAuthenticated, function (req, res) {
 });
 
 app.get("/import-data-from-binance", isAuth.ensureAuthenticated, function (req, res) {
-  func.exchangeInfo(function (data) {
-    res.render("import", { apiDatas: data, success: "" })
+  User.findById({ _id: req.user._id }, function (err, foundUser) {
+    if (err) {
+      console.log(err);
+    } else {
+     func.exchangeInfo(function (data) { 
+    if(data){
+      res.render("import", { apiDatas: data, success: "" ,user: foundUser})
+    }
   })
+    }
+  })
+ 
 });
 
 app.post("/import-data-from-binance", isAuth.ensureAuthenticated, function (req, res) {
+  let transactionsLength=0;
   const apiKey = req.body.key;
   const secret = req.body.secret;
   const tradePair = req.body.pairs
@@ -690,7 +700,9 @@ app.post("/import-data-from-binance", isAuth.ensureAuthenticated, function (req,
                         } else if (!newObj) {
                           console.log("no Transactions found");
                         } else {
-                          console.log(newObjs + "Transactions Found");
+                       transactionsLength= [newObjs].reduce((a, b) => a + b, 0)
+                       
+                          console.log(transactionsLength + " Transactions Found");
                         }
                       })
                   })
