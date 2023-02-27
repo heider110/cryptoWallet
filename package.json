@@ -1,6 +1,9 @@
 {
   "name": "crypto",
   "version": "1.0.0",
+  "engines": {
+    "node": "18.13.0"
+  },
   "description": "cryptoWallet",
   "main": "app.js",
   "scripts": {
@@ -10,9 +13,6 @@
   "keywords": [],
   "author": "Haidar Alkhazaly",
   "license": "ISC",
-"engines": {
-  "node": "18.13.0"
-},
   "dependencies": {
     "axios": "^1.2.0",
     "bcrypt": "^5.1.0",
